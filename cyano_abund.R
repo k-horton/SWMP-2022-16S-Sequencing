@@ -1,11 +1,17 @@
-# First, load sequence data and remove contaminant samples as determined previously (see file decontam_prev.R)
 library(decontam)
 library(file2meco)
 library(microeco)
 library(dplyr)
 library(ggplot2)
+library(phyloseq)
+
+# First, load sequence data and remove contaminant samples as determined previously 
+    # (see files decontam_prev.R, decontam_freq.R)
+    # If you already have the ps.prev.noncontam object from previous scripts, skip next 
+    # section and continue to "If you already have ps.prev.noncontam object"
 
 #### If you don't have ps.prev.noncontam object: ####
+
 #create microtable as before
 # Assign current working directory to 'dir'
 dir<-getwd()
@@ -31,9 +37,12 @@ table2$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 
 # convert microtable to phyloseq object
 physeq <- meco2phyloseq(table2)
+physeq
 
 # Specify negative control sample
-sample_data(physeq)$is.neg <- sample_data(physeq)$Control == "TRUE"
+sample_data(physeq)$is.neg <- sample_data(physeq)$Control == "Neg"
+contamdf.prev <- isContaminant(physeq, method="prevalence", neg="is.neg", threshold = 0.10)
+table(contamdf.prev$contaminant)
 
 # Identify contaminants
 contamdf.prev <- isContaminant(physeq, method="prevalence", neg="is.neg", threshold=0.5)
@@ -49,6 +58,9 @@ no_ctrl <- clone(df)
 no_ctrl$sample_table <- subset(no_ctrl$sample_table, Control == "FALSE")
 no_ctrl$tidy_dataset()
 
+# Skip the next section "If you already have ps.prev.noncontam object" and
+ # continue on at section "Now continue with "no_ctrl" object"
+
 #### If you already have ps.prev.noncontam object: ####
 
 # convert phyloseq object back to a microtable:
@@ -56,6 +68,7 @@ df <- phyloseq2meco(ps.prev.noncontam)
 
 no_ctrl<- df
 no_ctrl$sample_table<-subset(no_ctrl$sample_table, Control == "FALSE")
+no_ctrl$tidy_dataset()
 
 
 #### Now continue with "no_ctrl" object: ####
@@ -104,6 +117,7 @@ un_cyano_list<-unique(cyano_list) #33 unique names
 bact_list<-clone(no_ctrl)
 bact_list$tax_table <- subset(bact_list$tax_table, Kingdom == "k__Bacteria")
 bact_list$tax_table <- subset(bact_list$tax_table, Class != "c__Cyanobacteriia")
+bact_list$tidy_dataset()
 
 bact_abund <- trans_abund$new(dataset = bact_list, taxrank = "Genus") 
 bact_list<-bact_abund$data_abund$Taxonomy #56097 rows
