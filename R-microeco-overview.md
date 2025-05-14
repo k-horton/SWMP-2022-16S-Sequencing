@@ -7,7 +7,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
      *(File: create_microtable.R)*
 
-2. Assess the sequencing error rate using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024. The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
+2. Assess the sequencing error rate using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024). The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
 
    *(File: sequencing_error_rate.R)*
 
@@ -24,4 +24,19 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
     *(File: cyano_abund.R)*
 
 ![cyano_abund](https://github.com/user-attachments/assets/faaa3add-9ce5-486d-b2c4-bffd1c4f45d6)
+
+
+
+##### Citations
+Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of         contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
+
+Liu, C., Cui, Y., Li, X., Yao, M. microeco: an R package for data mining
+  in microbial community ecology. FEMS Microbiology Ecology, 2021, Volume 97, Issue 2,
+  fiaa255
+
+Liu, C., Li, X., Mansoldo, F.R.P., An, J., Kou, Y., Zhang, X., Wang, J., Zeng, J.,
+  Vermelho, A.B., Yao, M. Microbial habitat specificity largely affects microbial
+  co-occurrence patterns and functional profiles in wetland soils. Geoderma, 2022. 418, 115866.
+
+Zymo Research, ZymoBIOMICS Microbial Community DNA Standard CAT# D6305, 2024. https://zymoresearch.eu/products/zymobiomics-microbial-community-dna-standard. 
 
