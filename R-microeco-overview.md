@@ -23,4 +23,5 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
     *(File: cyano_abund.R)*
 
-   ![cyano_abund_zoom](https://github.com/user-attachments/assets/44efb70f-5878-4663-b520-b2cc02739e8b)
+![cyano_abund](https://github.com/user-attachments/assets/faaa3add-9ce5-486d-b2c4-bffd1c4f45d6)
+
