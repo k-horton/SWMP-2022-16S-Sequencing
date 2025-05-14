@@ -1,6 +1,6 @@
 ## Analysis of Sequences in R using microeco
 
-After processing sequences with QIIME 2, data analysis was completed with the R package microeco (Liu, C. et al. 2021). 
+After processing sequences with QIIME 2, data analysis was completed with the R package microeco (Liu, C. et al. 2021). Note that water quality data has already been analyzed (see repository SWMP-2022-Water-Quality), and will be used to understand the context of the microbial community observed here.
 
 ### Steps:
 1. QIIME 2 processed sequences were loaded into R and combined with sample metadata to create a 'microtable' object using functions from the file2meco R package (Liu, C. et al. 2022). Mitochondrial and chloroplast sequences were filtered out.
