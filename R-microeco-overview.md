@@ -25,7 +25,17 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
 ![cyano_abund](https://github.com/user-attachments/assets/faaa3add-9ce5-486d-b2c4-bffd1c4f45d6)
 
+6. Assess community composition of all cyanobacteria detected.
+    *(File: community_composition.R)*
 
+7. Identify nitrogen fixers and relationship with nitrogen conditions.
+    *(File: nitrogen_fixation.R)*
+
+8. Identify potential microcystin producers and relationship with environmental variables.
+    *(File: mcyE_producers.R)*
+
+9. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
+    *(File: method_comparison.R)*
 
 ##### Citations
 Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of         contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
