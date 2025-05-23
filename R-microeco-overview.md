@@ -7,19 +7,19 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
      *(File: create_microtable.R)*
 
-2. Assess the sequencing error rate using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024). The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
+2. Assess the sequencing error rate with the microeco package (Liu, C. et al. 2022) using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024). The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
 
    *(File: sequencing_error_rate.R)*
 
-3. Assess the negative control for potential false positive hits. Note that the negative control sample is not a 'true' negative control, as it was not subjected to DNA extraction. The negative control was supplied by the sequencing laboratory. Several taxa were detected in the negative control sample. Further evaluation of the potential contaminants is required. 
+3. Assess the negative control for potential false positive hits using the packages microeco, dplyr, and tidyr (Liu et al. 2021, Wickham et al. 2023, 2024). Note that the negative control sample is not a 'true' negative control, as it was not subjected to DNA extraction. The negative control was supplied by the sequencing laboratory. Several taxa were detected in the negative control sample. Further evaluation of the potential contaminants is required. 
 
    *(File: negative_control_sample.R)*
 
-4. The decontam R package was used to identify contaminating sequences through both sequence frequency and sequence prevalance approaches as outlined by Davis et al. 2018. Contaminating sequences were removed using the prevalence-based method provided in the decontam R package because a negative-control was used in the study. Additionally, several of the samples had relatively low biomass and prevalence, making the frequency-based method less reliable. In total, 3 taxa were identified as contaminants and removed.
+4. The decontam R package was used to identify contaminating sequences through both sequence frequency and sequence prevalance approaches as outlined by Davis et al. 2018. Contaminating sequences were removed using the prevalence-based method provided in the decontam R package because a negative-control was used in the study. Additionally, several of the samples had relatively low biomass and prevalence, making the frequency-based method less reliable. The ggplot2 package was used to plot the prevalence of taxa in true samples against prevalence in negative control (Wickham 2016). In total, 3 taxa were identified as contaminants and removed.
 
     *(File: decontam_freq.R, decontam_prev.R)*
 
-5. Abundance of cyanobacteria compared to all bacteria detected was assessed across samples.
+5. Abundance of cyanobacteria compared to all bacteria detected was assessed across samples. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
 
     *(File: cyano_abund.R)*
 
@@ -42,7 +42,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
      *(File: method_comparison.R)*
 
 ##### Citations
-Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of         contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
+Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
 
 Liu, C., Cui, Y., Li, X., Yao, M. microeco: an R package for data mining
   in microbial community ecology. FEMS Microbiology Ecology, 2021, Volume 97, Issue 2,
@@ -51,6 +51,14 @@ Liu, C., Cui, Y., Li, X., Yao, M. microeco: an R package for data mining
 Liu, C., Li, X., Mansoldo, F.R.P., An, J., Kou, Y., Zhang, X., Wang, J., Zeng, J.,
   Vermelho, A.B., Yao, M. Microbial habitat specificity largely affects microbial
   co-occurrence patterns and functional profiles in wetland soils. Geoderma, 2022. 418, 115866.
+
+McMurdie, P. J., and S. Holmes. 2013. Phyloseq: An R Package for Reproducible Interactive Analysis and Graphics of Microbiome Census Data. PLoS ONE 8.
+
+Wickham, H. 2016. ggplot2: Elegant Graphics for Data Analysis Second Edition. Page (R. Gentleman, K. Hornik, and G. Parmigiani, Eds.). 2nd edition. Springer, Houston, TX
+
+Wickham, H., R. François, L. Henry, K. Müller, and D. Vaughan. 2023, November 17. dplyr: A Grammar of Data Manipulation.
+
+Wickham, H., D. Vaughan, and M. Girlich. 2024, January 24. tidyr: Tidy Messy Data.
 
 Zymo Research, ZymoBIOMICS Microbial Community DNA Standard CAT# D6305, 2024. https://zymoresearch.eu/products/zymobiomics-microbial-community-dna-standard. 
 
