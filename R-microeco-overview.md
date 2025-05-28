@@ -27,9 +27,6 @@ Figure 1: Relative abundance of cyanobacteria compared to total bacteria based o
 ![cyano_abund](https://github.com/user-attachments/assets/faaa3add-9ce5-486d-b2c4-bffd1c4f45d6)
 
 Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each field day conducted following ANOVA.
-![image](https://github.com/user-attachments/assets/c8e8c2cc-9e64-4576-a58f-7bca80e4ab1f)
-
-
 |  Date    |June 23rd  | July 20th |  Aug 3rd |  Aug 23rd | Aug 31st|
 | ---      | ---       | ---       | ---      | ---       | ---     | 
 |July 20th |0.0534     |-          |-         |-          |-        |
