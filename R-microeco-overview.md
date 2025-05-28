@@ -26,7 +26,8 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 Figure 1: Relative abundance of cyanobacteria compared to total bacteria based on sequenced V3-V4 region of DNA extracted from stormwater management pond (SWMP) water samples.
 ![cyano_abund](https://github.com/user-attachments/assets/faaa3add-9ce5-486d-b2c4-bffd1c4f45d6)
 
-![image](https://github.com/user-attachments/assets/f758ecf4-f057-437e-8b63-fdebe6a332b9)
+Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each field day conducted following ANOVA.
+![image](https://github.com/user-attachments/assets/7533342b-79e1-4bab-af77-065af5220eda)
 
 
 6. Assess community composition of all cyanobacteria detected.
