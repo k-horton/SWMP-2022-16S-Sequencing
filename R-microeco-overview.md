@@ -30,6 +30,13 @@ Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each 
 ![image](https://github.com/user-attachments/assets/c8e8c2cc-9e64-4576-a58f-7bca80e4ab1f)
 
 
+          June 23rd   July 20th   Aug 3rd   Aug 23rd  Aug 31st   
+July 20th  0.0534     -           -         -         -     
+Aug 3rd    0.5958     1.0000      -         -         -     
+Aug 23rd   1.0000     0.4621      1.0000    -         -     
+Aug 31st   0.8811     8.6e-05     0.0027    0.1584    -     
+Sept 27th  0.4616     3.8e-05     0.0012    0.0769    1.0000
+
 6. Assess community composition of all cyanobacteria detected.
 
     *(File: community_composition.R)*
