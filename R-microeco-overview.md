@@ -33,7 +33,7 @@ Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each 
 |Aug 3rd   |0.5958     |1.0000     |-         |-          |-        |
 |Aug 23rd  |1.0000     |0.4621     |1.0000    |-          |-        |  
 |Aug 31st  |0.8811     |8.6e-05    |0.0027    |0.1584     |-        |  
-|Sept 27th |0.4616     |3.8e-05    |0.0012    |0.0769     |- 1.0000 |
+|Sept 27th |0.4616     |3.8e-05    |0.0012    |0.0769     |1.0000 |
 
 Figure 2: Total cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
 ![t_cyano_abund_box](https://github.com/user-attachments/assets/ce02a93b-49a2-40aa-9221-41a2f24fd46f)
