@@ -1,5 +1,5 @@
 # Read Me
-The code outlined in this project was used to analyze DNA sequences obtained from water samples collected from stormwater management ponds in 2022 as part of academic research at Ontario Tech University. Some elements were adapted from previously published code provided by Dacey and Chain, 2021. 
+The code outlined in this project was used to analyze DNA sequences obtained from water samples collected from stormwater management ponds in 2022 as part of academic research at Ontario Tech University. Some elements were adapted from previously published code provided by Dacey and Chain, 2021. Additionally, water quality data was also analyzed, see the repository k-horton/SWMP-2022-Water-Quality (https://github.com/k-horton/SWMP-2022-Water-Quality) for more information.
 
 A DNA library was prepared of the V3-V4 region of the 16S gene using the Quick-16S Plus NGS Library Prep Kit (V3-V4, UDI) (Zymo Research 2024), and then sequenced using paired-end Illumina MiSeq sequencing using the MiSeq Reagent Kit v3 (600-cycle). 
 
