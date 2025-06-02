@@ -1,4 +1,4 @@
-## Analysis of Sequences in R using microeco
+## Analysis of 16S Sequences in R using microeco
 
 After processing sequences with QIIME 2, data analysis was completed with the R package microeco (Liu, C. et al. 2021). Note that water quality data has already been analyzed (see repository SWMP-2022-Water-Quality), and will be used to understand the context of the microbial community observed here.
 
