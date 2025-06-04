@@ -24,7 +24,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
     *(File: cyano_abund.R)*
 
 Figure 1: Relative abundance of cyanobacteria compared to total bacteria over time based on sequenced V3-V4 region of DNA extracted from stormwater management pond (SWMP) water samples.
-![cyano_abund_box](https://github.com/user-attachments/assets/0ae86e1c-1abc-4e54-814f-d10eac30b1e6)
+![cyano_abund_box](https://github.com/user-attachments/assets/ee61d007-7e54-4878-b7b3-391509eaae5b)
 
 Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each field day conducted following ANOVA.
 |  Date    |June 23rd  | July 20th |  Aug 3rd |  Aug 23rd | Aug 31st|
