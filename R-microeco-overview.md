@@ -44,7 +44,7 @@ Figure 2: Total cyanobacterial cells observed over time in stormwater management
     *(File: community_composition.R)*
 
 Figure 3: Total unicellular cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
-![uni_abund_box](https://github.com/user-attachments/assets/114efb57-879d-4bfc-b08b-155c4558acb9)
+![uni_abund_box](https://github.com/user-attachments/assets/b9560ccd-64a6-4a6b-b0ec-913f13cc1c82)
 
 Figure 4: Total colony-forming cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
 ![colony_abund_box](https://github.com/user-attachments/assets/7455557c-8b8d-4c48-a622-8872446a26f7)
