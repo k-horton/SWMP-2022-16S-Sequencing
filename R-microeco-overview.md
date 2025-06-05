@@ -61,7 +61,12 @@ Figure 5: Total filamentous cyanobacterial cells observed over time in stormwate
  
     *(File: mcyE_producers.R)*
 
-10. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
+
+Figure X: Concentration of chloride (mg/L) at SWMP pond sites across field days (see repository SWMP-2022-Water-Quality for full water quality analysis. 
+![pond_chloride_box](https://github.com/user-attachments/assets/04efc1d2-faf2-43ae-9a43-bd93fadb40b0)
+
+
+11. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
 
      *(File: method_comparison.R)*
 
