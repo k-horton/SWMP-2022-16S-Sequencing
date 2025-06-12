@@ -7,11 +7,41 @@ library(tidyr)
 library(readxl)
 library(writexl)
 
-#### Read in joined WQ and micro data dataframe####
+#### Create cyanobacteria abundance table by date and SWMP ####
 dir<-getwd()
+
+genus_data<-read_excel(paste0(dir,"/genus_cyano_df.xlsx"))
+
+genus_data$Date<-factor(genus_data$Date,
+                     levels=c("June 23rd","July 20th","Aug 3rd",
+                              "Aug 23rd", "Aug 31st",  "Sept 27th"),
+                     labels = c("June 23rd", "July 20th", "Aug 3rd",
+                                "Aug 23rd","Aug 31st",  "Sept 27th"))
+
+cyano_abund<-pivot_wider(genus_data[c(3,59,60,61,62,63)], 
+                   id_cols = c("Class", "Order","Family", "Genus"), 
+                   names_from = "Date", names_sort = TRUE,
+                   values_from = "genus_abundance",
+                   values_fn=mean)
+
+excel_output_path <- paste0(dir,"/stats/cyano_abund_DATE_16S_sequencing.xlsx")
+write_xlsx(cyano_abund, path = excel_output_path)
+
+
+cyano_abund<-pivot_wider(genus_data[c(4,59,60,61,62,63)], 
+                         id_cols = c("Class", "Order","Family", "Genus"), 
+                         names_from = "IDL", names_sort = TRUE,
+                         values_from = "genus_abundance",
+                         values_fn=mean)
+
+excel_output_path <- paste0(dir,"/stats/cyano_abund_SWMPID_16S_sequencing.xlsx")
+write_xlsx(cyano_abund, path = excel_output_path)
+
+
+#### Read in joined WQ and micro data dataframe####
 join_data<-read_excel(paste0(dir,"/total_cyano_df.xlsx"))
 
-# subset data
+#### subset data ####
 dataset <- join_data[c(3:5,14,40,47:50,99:102)]
 # set date as a factor and order chronologically
 dataset$Date<-factor(dataset$Date,

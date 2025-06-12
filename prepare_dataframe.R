@@ -388,7 +388,70 @@ hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 # this is good, use log transformation
 
+# mcyE copies / L #
+res_aov <- aov(copies_mcyE_L ~ Date,
+               data = total_cyano)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
 
+# try log transformation
+res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,
+               data = total_cyano)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# drop zero values and re-check
+total_cyano_sub<-total_cyano
+total_cyano_sub$copies_mcyE_L[total_cyano_sub$copies_mcyE_L==0] <- NA
+total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+
+res_aov <- aov(copies_mcyE_L ~ Date,
+               data = total_cyano_sub)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,
+               data = total_cyano_sub)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+# this is better, use log transformation
+
+# mcyE copies : 16S copies #
+res_aov <- aov(mcyE_16S_ratio ~ Date,
+               data = total_cyano)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# try log transformation
+res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date,
+               data = total_cyano)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# drop zero values and re-check
+total_cyano_sub<-total_cyano
+total_cyano_sub$mcyE_16S_ratio[total_cyano_sub$mcyE_16S_ratio==0] <- NA
+total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+
+res_aov <- aov(mcyE_16S_ratio ~ Date,
+               data = total_cyano_sub)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date,
+               data = total_cyano_sub)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# this is better, use log transformation
 # So, to summarize, the following transformations will be applied when conducting
 #   parametric statistical tests:
 #   - Abundance         ->  log10(Abundance+0.1)
@@ -398,11 +461,10 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 #   - Filamentous cells ->  log10(Filamentouscells_L+0.01)
 #   - Total cells       ->  log10(Totalcells_L+0.01)
 #   - 16S copies        ->  log10(copies_16S_L+0.01) 
+#   - mcyE copies       ->  log10(copies_mcyE_L+0.01) 
+#   - mcyE : 16S copies ->  log10(mcyE_16S_ratio+0.01) 
 
 # normality will be checked for additional variables as they come up
-
-
-
 
 
 ##### Apply Transformations #####
@@ -438,6 +500,8 @@ total_cyano$logU_cyano<-log10(total_cyano$Unicellularcells_L+0.01)
 total_cyano$logC_cyano<-log10(total_cyano$Colonialcells_L+0.01)
 total_cyano$logF_cyano<-log10(total_cyano$Filamentouscells_L+0.01)
 total_cyano$logT_cyano<-log10(total_cyano$Totalcells_L+0.01)
+total_cyano$logmcyE_16S<-log10(total_cyano$mcyE_16S_ratio+0.01)
+
 
 
 write_xlsx(total_cyano,paste0(dir,"/total_cyano_df.xlsx"))
@@ -477,6 +541,7 @@ genus_cyano$logU_cyano<-log10(genus_cyano$Unicellularcells_L+0.01)
 genus_cyano$logC_cyano<-log10(genus_cyano$Colonialcells_L+0.01)
 genus_cyano$logF_cyano<-log10(genus_cyano$Filamentouscells_L+0.01)
 genus_cyano$logT_cyano<-log10(genus_cyano$Totalcells_L+0.01)
+genus_cyano$logmcyE_16S<-log10(genus_cyano$mcyE_16S_ratio+0.01)
 
 
 write_xlsx(genus_cyano,paste0(dir,"/genus_cyano_df.xlsx"))
