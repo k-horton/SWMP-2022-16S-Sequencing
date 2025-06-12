@@ -157,7 +157,7 @@ join_data$Date<-factor(join_data$Date,
 
 dataset<-join_data[c(3:5,14,40:42, 50,55,95:97,102)]
 
-#### Output Cyano abund. Summary stats to excel for DATE and SWMP ID ####
+#### Summ. Stats - Cyano abund. for DATE and SWMP ID ####
 # DATE
 summary_stats_list <- list()
 
@@ -184,7 +184,8 @@ for (variable_name in numerical_cols) {
 
 final_summ_stats <- bind_rows(summary_stats_list)
 
-excel_output_path <- paste0(dir,"/stats/cyano_DATE_summary_stats.xlsx")
+dir.create(file.path(paste0(dir,"/stats"), "/overall_cyano_stats"), showWarnings = FALSE)
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_DATE_summ_stats.xlsx")
 write_xlsx(final_summ_stats, path = excel_output_path)
 
 # SWMP ID
@@ -213,10 +214,10 @@ for (variable_name in numerical_cols) {
 
 final_summ_stats <- bind_rows(summary_stats_list)
 
-excel_output_path <- paste0(dir,"/stats/cyano_SWMPID_summary_stats.xlsx")
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_SWMPID_summ_stats.xlsx")
 write_xlsx(final_summ_stats, path = excel_output_path)
 
-#### Output ANOVA data for DATE to excel ####
+#### ANOVA - Cyano abund. for DATE ####
 # Initialize an empty list to store ANOVA results
 anova_results_list <- list()
 
@@ -256,10 +257,11 @@ final_anova_df$Cat_Variable<-factor(final_anova_df$Cat_Variable,
 # drop observations for residuals
 final_anova_df_2<-final_anova_df[final_anova_df$Cat_Variable == "Date",]
 
-excel_output_path <- paste0(dir,"/stats/cyano_date_anova_summary.xlsx")
+
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_DATE_anova.xlsx")
 write_xlsx(final_anova_df_2, path = excel_output_path)
 
-#### Output T-test data for FLOW to excel ####
+#### T-test - Cyano abund. for FLOW ####
 # Initialize an empty list to store T-test results
 t.test_results_list <- list()
 
@@ -289,10 +291,10 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Storm_Base",]
 
-excel_output_path <- paste0(dir,"/stats/cyano_flow_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_FLOW_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
 
-#### Output T-test data for DREDGE to excel ####
+#### T-test - Cyano abund. for DREDGE ####
 # Initialize an empty list to store T-test results
 t.test_results_list <- list()
 
@@ -322,9 +324,9 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Dredge_Cat",]
 
-excel_output_path <- paste0(dir,"/stats/cyano_dredge_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_DREDGE_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
-#### Output T-test data for PRE_2003 to excel ####
+#### T-test - Cyano abund. for PRE_2003 ####
 # Initialize an empty list to store T-test results
 t.test_results_list <- list()
 
@@ -354,7 +356,7 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Pre_2003",]
 
-excel_output_path <- paste0(dir,"/stats/cyano_flow_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_2003_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
 
 #### Define aesthetics for plots #####
@@ -370,7 +372,8 @@ box_theme <- theme(strip.background = element_rect(fill="white", color="black"),
                    axis.text.x = element_text(size = 20, vjust = 0.5),
                    axis.text.y = element_text(size = 20),
                    legend.title = element_text(size = 22, face = "bold"),
-                   legend.text = element_text(size = 20)
+                   legend.text = element_text(size = 20),
+                   legend.key=element_blank()
 )
 
 # set Date label order
@@ -379,7 +382,7 @@ date_level<-c("June 23rd","July 20th","Aug 3rd",
 
 my_colours_storm<-c("Stormflow"= "steelblue4",
                     "Low Flow" = "slategray1")
-##### Plots - Abundance from 16S sequencing #####
+#### Plots - Abundance from 16S sequencing #####
 cyano_box<-ggplot(dataset, aes(x=Date,
                              y=Abundance)) + 
   geom_boxplot(fill = "lightgray") + 
@@ -458,7 +461,7 @@ cyano_box+
 ggsave("cyano_abund_box.png",  plot = last_plot(), 
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
-##### Plot - Abundance from microscopy#####
+#### Plot - Abundance from microscopy#####
 t_cyano_box<-ggplot(dataset, aes(x=Date,
                              y=Totalcells_L)) + 
   geom_boxplot(fill = "lightgray") + 
@@ -473,7 +476,7 @@ ggsave("t_cyano_abund_box.png",  plot = last_plot(),
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
 
-##### Plot - Abundance from qPCR targeting 16S ####
+#### Plot - Abundance from qPCR targeting 16S ####
 q16S_box<-ggplot(dataset, aes(x=Date,
                                  y=copies_16S_L)) + 
   geom_boxplot(fill = "lightgray") + 
@@ -488,7 +491,7 @@ ggsave("q16S_abund_box.png",  plot = last_plot(),
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
 
-##### Plot - Abundance of all algae from Chl-a#####
+#### Plot - Abundance of all algae from Chl-a#####
 chla_box<-ggplot(dataset, aes(x=Date,
                                  y=Chla_gL)) + 
   geom_boxplot(fill = "lightgray") + 

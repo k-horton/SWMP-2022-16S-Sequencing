@@ -7,9 +7,18 @@ library(tidyr)
 library(readxl)
 library(writexl)
 
-#### Read in dataframes ####
+#### Read in joined WQ and micro data dataframe####
 dir<-getwd()
 join_data<-read_excel(paste0(dir,"/joined_data.xlsx"))
+
+# subset data
+dataset <- join_data[c(3:5,14,40,47:50,99:102)]
+# set date as a factor and order chronologically
+dataset$Date<-factor(dataset$Date,
+                   levels=c("June 23rd","July 20th","Aug 3rd",
+                            "Aug 23rd", "Aug 31st",  "Sept 27th"),
+                   labels = c("June 23rd", "July 20th", "Aug 3rd",
+                              "Aug 23rd","Aug 31st",  "Sept 27th"))
 #### Define aesthetics and labels ####
 # Define theme for boxplot
 box_theme <- theme(strip.background = element_rect(fill="white", color="black"),
@@ -49,15 +58,7 @@ bar_theme <- theme(strip.background = element_rect(fill="white", color="black"),
                    legend.text = element_text(size = 20)
 )
 
-#### Subset data ####
-dataset <- join_data[c(3:5,14,40,47:50,99:102)]
-# set date as a factor and order chronologically
-dataset$Date<-factor(dataset$Date,
-                   levels=c("June 23rd","July 20th","Aug 3rd",
-                            "Aug 23rd", "Aug 31st",  "Sept 27th"),
-                   labels = c("June 23rd", "July 20th", "Aug 3rd",
-                              "Aug 23rd","Aug 31st",  "Sept 27th"))
-#### Output cell type Summary stats to excel for DATE and SWMP ID ####
+#### Summ. Stats - abundance for each cell type for DATE and SWMP ID ####
 # DATE
 summary_stats_list <- list()
 
@@ -84,8 +85,11 @@ for (variable_name in numerical_cols) {
 
 final_summ_stats <- bind_rows(summary_stats_list)
 
-excel_output_path <- paste0(dir,"/stats/cell_type_DATE_summary_stats.xlsx")
+dir<-getwd()
+dir.create(file.path(paste0(dir,"/stats"), "/m_community_stats"), showWarnings = FALSE)
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_DATE_summ_stats.xlsx")
 write_xlsx(final_summ_stats, path = excel_output_path)
+
 
 # SWMP ID
 summary_stats_list <- list()
@@ -113,9 +117,8 @@ for (variable_name in numerical_cols) {
 
 final_summ_stats <- bind_rows(summary_stats_list)
 
-excel_output_path <- paste0(dir,"/stats/cell_type_SWMPID_summary_stats.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_SWMPID_summ_stats.xlsx")
 write_xlsx(final_summ_stats, path = excel_output_path)
-
 
 #### ANOVA - Each Cell-type for DATE ####
 #subset dataframe
@@ -159,11 +162,11 @@ final_anova_df$Cat_Variable<-factor(final_anova_df$Cat_Variable,
 # drop observations for residuals
 final_anova_df_2<-final_anova_df[final_anova_df$Cat_Variable == "Date",]
 
-dir<-getwd()
-excel_output_path <- paste0(dir,"/stats/cell-type_date_anova_summary.xlsx")
+
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_DATE_anova.xlsx")
 write_xlsx(final_anova_df_2, path = excel_output_path)
 
-##### Plots - Filamentous cells #####
+#### Plots - Filamentous cells #####
 # Boxplot total filamentous cyanobacterial cells across field days
 filam_box<-ggplot(dataset, aes(x=Date,
                              y=Filamentouscells_L)) + 
@@ -179,7 +182,7 @@ ggsave("filam_abund_box.png",  plot = last_plot(),
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
 
-##### Filamentous cells - Rosner Outlier test #####
+#### Rosner Outlier test - -Filamentous cells #####
 ros_fil<-dataset
 
 #plot filamentous cells without any grouping
@@ -214,7 +217,7 @@ t.test
 # there is not much change in the reusults even with the outliers removed,
 #     still no signicant differences in filamentous cells between field days
 
-##### Plots - Colonial cells #####
+#### Plots - Colonial cells #####
 # Boxplot total colony forming cyanobacterial cells across field days
 colony_box<-ggplot(dataset, aes(x=Date,
                                y=Colonialcells_L)) + 
@@ -229,7 +232,7 @@ colony_box
 ggsave("colony_abund_box.png",  plot = last_plot(), 
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
-##### Plots - Unicellular cells #####
+#### Plots - Unicellular cells #####
 # Boxplot total unicellular cyanobacterial cells across field days
 uni_box<-ggplot(dataset, aes(x=Date,
                          y=Unicellularcells_L)) + 
@@ -243,7 +246,7 @@ ggsave("uni_abund_box.png",  plot = last_plot(),
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
 
-##### Convert cell type to categorical variable #####
+#### Convert cell type to categorical variable #####
 cyano_long<-dataset%>% 
   pivot_longer(
     cols = c("Unicellularcells_L", "Colonialcells_L", "Filamentouscells_L"), 
@@ -253,7 +256,7 @@ cyano_long<-dataset%>%
 
 cyano_long$logCyano_cell_abund<-log10(cyano_long$Cyano_cell_abund+0.001)
 
-##### Output ANOVA and Pairwise T-test for cell type as cat. variable across field days ####
+#### ANOVA and Pairwise T-test - for cell type as cat. variable across field days ####
 # Repeated measures ANOVA (Within-subject):
 res.aov <- anova_test(data = cyano_long, dv = logCyano_cell_abund, 
                       wid = IDL, within = c(Date, Cyano_cell_type))
@@ -294,10 +297,10 @@ t.test
 # 18 Sept 27th logCy… Filam… Unice…    11    11 5.31e-2 ns       1.35e-1 ns  
 
 # output T-test and ANOVA results
-excel_output_path <- paste0(dir,"/stats/cell-type_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_CELLTYPE_t.test.xlsx")
 write_xlsx(t.test, path = excel_output_path)
 
-excel_output_path <- paste0(dir,"/stats/cell-type_anova_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_CELLTYPE_anova.xlsx")
 write_xlsx(anova_table, path = excel_output_path)
 
 # re-name levels for cell type
@@ -367,7 +370,7 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Storm_Base",]
 
-excel_output_path <- paste0(dir,"/stats/cell-type_flow_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_FLOW_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
 
 #### T-test - Cell-type for DREDGE ####
@@ -400,7 +403,7 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Dredge_Cat",]
 
-excel_output_path <- paste0(dir,"/stats/cell-type_dredge_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_DREDGE_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
 
 #### T-test - Cell-type for PRE_2003 ####
@@ -433,5 +436,5 @@ final_t.test_df <- bind_rows(t.test_results_list)
 # drop observations for residuals
 final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Pre_2003",]
 
-excel_output_path <- paste0(dir,"/stats/cell-type_2003_t.test_summary.xlsx")
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_2003_t.test.xlsx")
 write_xlsx(final_t.test_df_2, path = excel_output_path)
