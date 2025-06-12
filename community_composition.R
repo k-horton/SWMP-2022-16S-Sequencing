@@ -9,7 +9,7 @@ library(writexl)
 
 #### Read in joined WQ and micro data dataframe####
 dir<-getwd()
-join_data<-read_excel(paste0(dir,"/joined_data.xlsx"))
+join_data<-read_excel(paste0(dir,"/total_cyano_df.xlsx"))
 
 # subset data
 dataset <- join_data[c(3:5,14,40,47:50,99:102)]
