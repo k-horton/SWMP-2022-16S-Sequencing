@@ -5,9 +5,9 @@ library(dplyr)
 library(rstatix)
 library(ggplot2)
 library(phyloseq)
-library(EnvStats)
 library(ggpubr)
 library(writexl)
+library(ggplot2)
 
 #### Prepare microtable as before ####
 #create microtable 
@@ -146,7 +146,7 @@ ggsave("zoom_all_bact_abund_bar.png",  plot = last_plot(),
 
 #### Read in joined WQ and micro data dataframe ####
 dir<-getwd()
-join_data<-read_excel(paste0(dir,"/joined_data.xlsx"))
+join_data<-read_excel(paste0(dir,"/total_cyano_df.xlsx"))
 #### Prepare dataframe and subset to variables of interest ####
 # set date as a factor and order chronologically
 join_data$Date<-factor(join_data$Date,
