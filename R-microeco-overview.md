@@ -19,7 +19,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
     *(File: decontam_freq.R, decontam_prev.R)*
 
-5. Abundance of cyanobacteria compared to all bacteria detected was assessed across samples. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
+5.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
 
     *(File: cyano_abund.R)*
 
@@ -39,7 +39,7 @@ Figure 2: Total cyanobacterial cells observed over time in stormwater management
 ![t_cyano_abund_box](https://github.com/user-attachments/assets/ce02a93b-49a2-40aa-9221-41a2f24fd46f)
 
 
-6. Assess community composition of all cyanobacteria detected.
+6. Abundance of each cyanobacteria morphology observed with microscopy were compared across field days.
 
     *(File: community_composition.R)*
 
