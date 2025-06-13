@@ -2,6 +2,7 @@
 library(decontam)
 library(file2meco)
 library(microeco)
+library(phyloseq)
 library(writexl)
 library(readxl)
 library(tidyr)
@@ -501,6 +502,7 @@ total_cyano$logC_cyano<-log10(total_cyano$Colonialcells_L+0.01)
 total_cyano$logF_cyano<-log10(total_cyano$Filamentouscells_L+0.01)
 total_cyano$logT_cyano<-log10(total_cyano$Totalcells_L+0.01)
 total_cyano$logmcyE_16S<-log10(total_cyano$mcyE_16S_ratio+0.01)
+total_cyano$logHet<-log10(total_cyano$Total_Het_L+0.01)
 
 
 
@@ -542,6 +544,7 @@ genus_cyano$logC_cyano<-log10(genus_cyano$Colonialcells_L+0.01)
 genus_cyano$logF_cyano<-log10(genus_cyano$Filamentouscells_L+0.01)
 genus_cyano$logT_cyano<-log10(genus_cyano$Totalcells_L+0.01)
 genus_cyano$logmcyE_16S<-log10(genus_cyano$mcyE_16S_ratio+0.01)
+genus_cyano$logHet<-log10(genus_cyano$Total_Het_L+0.01)
 
 
 write_xlsx(genus_cyano,paste0(dir,"/genus_cyano_df.xlsx"))
