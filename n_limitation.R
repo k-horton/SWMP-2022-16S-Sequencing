@@ -20,7 +20,7 @@ allcyano_data$Date<-factor(allcyano_data$Date,
                            labels = c("June 23rd",    "July 20th",  "Aug 3rd",
                                       "Aug 23rd", "Aug 31st", "Sept 27th") )
 
-allcyano<-allcyano_data[c(3:5,14:31,40:42,47:50,52:55,57,59:102, 104)]
+allcyano<-allcyano_data[c(3:5,14:31,40:42,47:50,52:55,57,58:101, 103)]
 
 #### Summ. Stats - Total heterocysts /L for DATE and SWMP ID ####
 # DATE
