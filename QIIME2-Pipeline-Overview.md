@@ -1,5 +1,5 @@
 ## QIIME 2 Pipeline Overview
-Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from the previously outlined pipeline (Dacey and Chain, 2021) to trim and combine sequences using a combination of merging and concatenating. Assigned taxonomy and sequences were further analysed using the microeco package in R. 
+Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from the previously outlined pipeline (Dacey and Chain, 2021) to trim and combine sequences using a combination of merging and concatenating. Assigned taxonomy and sequences were further analysed using the microeco package in R (see *R-microeco-overview.md*). 
 
 #### Additional Notes
 1. All shell script files were generated on a Windows PC, so before running any scripts in Linux or a Windows Subsystem for Linux (WSL) such as Ubuntu, the command **'dos2unix  [file name]'*** must be run to convert the script to Linux format.
