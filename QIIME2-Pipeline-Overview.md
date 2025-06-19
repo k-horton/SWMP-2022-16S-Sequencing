@@ -21,7 +21,7 @@ Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from
    
       - Manifest file with locations of sequences created before next step.
   
-       *(Files: manifest_filecreate_initial_trim.sh, manifest_file_initial_trim.sh,  multi_job_manifest_initial_trim.sh)*
+      *(Files: manifest_filecreate_initial_trim.sh, manifest_file_initial_trim.sh,  multi_job_manifest_initial_trim.sh)*
        
 3. Phred quality score (Q-score) distribution plots were used to determine trimming length.
 
@@ -39,7 +39,7 @@ Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from
 
    *(Files: merge_concat.sh, multi_job_merge_coincat.sh)*
 
-- Create a manifest file with the locations of the merged and concatenated reads for each sample before next step.
+    - Create a manifest file with the locations of the merged and concatenated reads for each sample before next step.
 
      *(Files: manifest_filecreate_merge_concat.sh, manifest_file_merge_concat.sh,  multi_job_manifest_merge_concat.sh)*
  
