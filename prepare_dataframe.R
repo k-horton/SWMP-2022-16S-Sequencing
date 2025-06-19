@@ -108,7 +108,7 @@ seq$key<-paste(seq$Date,"-" ,seq$IDL)
 df1$key<-paste(df1$Date,"-" ,df1$IDL) 
 
 # merge seq data w/ WQ data
-seq_sub<-seq[c(2,41,42,44,46)]
+seq_sub<-seq[c(2,42,43,46)]
 total_cyano<-merge(x = df1, y = seq_sub, by = "key", all.x = TRUE)
 
 #### Create a 2nd dataframe with Genus-specific abundance data ####

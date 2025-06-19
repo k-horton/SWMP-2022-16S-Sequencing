@@ -159,7 +159,7 @@ join_data$Date<-factor(join_data$Date,
                          labels = c("June 23rd",    "July 20th",  "Aug 3rd",
                                     "Aug 23rd", "Aug 31st", "Sept 27th") )
 
-dataset<-join_data[c(3:5,14,40:42, 50,55,95:97,102)]
+dataset<-join_data[c(3:5,14,40:42, 50,55,94:96,101)]
 
 #### Summ. Stats - Cyano abund. for DATE and SWMP ID ####
 # DATE
