@@ -2,9 +2,9 @@
 Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from the previously outlined pipeline (Dacey and Chain, 2021) to trim and combine sequences using a combination of merging and concatenating. Assigned taxonomy and sequences were further analysed using the microeco package in R. 
 
 #### Additional Notes
-1. All shell script files were generated on a Windows PC, so before running any scripts in Linux or a Windows Subsystem for Linux (WSL) such as Ubuntu, the command **'dos2unix  [file name]'** must be run to convert the script to Linux format
+1. All shell script files were generated on a Windows PC, so before running any scripts in Linux or a Windows Subsystem for Linux (WSL) such as Ubuntu, the command **'dos2unix  [file name]'*** must be run to convert the script to Linux format.
 
-   *(replace [file name] with the name of the script file).
+   *replace **[file name]** with the name of the script file
 
 3.  Where files say '[Working Directory]', the location of all files being used should be inserted in place of '[Working Directory]'. For example, 'cd /mnt/c/Users/username/Documents/folder1/folder2'
 
