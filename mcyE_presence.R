@@ -18,7 +18,7 @@ allcyano_data$Date<-factor(allcyano_data$Date,
                        labels = c("June 23rd",    "July 20th",  "Aug 3rd",
                                   "Aug 23rd", "Aug 31st", "Sept 27th") )
 
-allcyano<-allcyano_data[c(3:5,14:31,40:42,44:51,55,56,59:103)]
+allcyano<-allcyano_data[c(3:5,14:31,40:42,44:51,55,56,58:102)]
 
 #### Summ. Stats - mcyE copies for DATE and SWMP ID ####
 # DATE
