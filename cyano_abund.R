@@ -59,6 +59,8 @@ bact<-clone(no_ctrl)
 # Calculate abundance for all bacteria at the Genus level
 bact$tax_table <- subset(bact$tax_table, Kingdom == "k__Bacteria")
 all_bact_abund <- trans_abund$new(dataset = bact, taxrank = "Genus") 
+# Adjust abundance based on initial DNA concentration of sample
+all_bact_abund$Abundance<-all_bact_abund$Abundance / all_bact_abund$q_conc
 
 # Make another copy of the microtable, and subset to the Cyanobacteriia class
 cyano_mt<-clone(no_ctrl)
@@ -66,7 +68,8 @@ cyano_mt$tax_table <- subset(cyano_mt$tax_table, Class == "c__Cyanobacteriia")
 
 # Calculate abundance for all Cyanobacteria at the Genus level
 cyano_abund <- trans_abund$new(dataset = cyano_mt, taxrank = "Genus") 
-unique(cyano_abund$data_abund$Taxonomy)
+# Adjust abundance based on initial DNA concentration of sample
+cyano_abund$Abundance<-cyano_abund$Abundance / cyano_abund$q_conc
 
 # Output Cyanobacteria Genus names to a list
 cyano_list<-cyano_abund$data_abund$Taxonomy #1518 rows
@@ -91,6 +94,7 @@ bact_list$tax_table <- subset(bact_list$tax_table, c(Kingdom == "k__Bacteria" &
 bact_list$tidy_dataset()
 
 bact_abund <- trans_abund$new(dataset = bact_list, taxrank = "Genus") 
+bact_abund$Abundance<-bact_abund$Abundance / bact_abund$q_conc
 bact_list<-bact_abund$data_abund$Taxonomy #56097 rows
 un_bact_list<-unique(bact_list) #813 unique names
 
@@ -382,7 +386,7 @@ date_level<-c("June 23rd","July 20th","Aug 3rd",
 
 my_colours_storm<-c("Stormflow"= "steelblue4",
                     "Low Flow" = "slategray1")
-#### Plots - Abundance from 16S sequencing #####
+#### Plot - Abundance from 16S sequencing #####
 cyano_box<-ggplot(dataset, aes(x=Date,
                              y=Abundance)) + 
   geom_boxplot(fill = "lightgray") + 
@@ -451,10 +455,10 @@ label_sub$label<-ifelse((label_sub$p.adj > 0.05),
                        
 # Plot with significance
 cyano_box+
-  stat_pvalue_manual(label_sub, label = "label", y.position = 40, step.increase=0.1)
+  stat_pvalue_manual(label_sub, label = "label", y.position = 80, step.increase=0.1)
 
 # Customize y position for each comparison
-y <- c(70, 59, 50, 73, 56, 53, 23) 
+y <- c(195, 75, 60, 210, 130, 115, 100) 
 cyano_box+
   stat_pvalue_manual(label_sub, label = "label", y.position=y)
 
