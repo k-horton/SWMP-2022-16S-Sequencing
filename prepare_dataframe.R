@@ -108,7 +108,7 @@ seq$key<-paste(seq$Date,"-" ,seq$IDL)
 df1$key<-paste(df1$Date,"-" ,df1$IDL) 
 
 # merge seq data w/ WQ data
-seq_sub<-seq[c(2,41,42,44,45)]
+seq_sub<-seq[c(2,41,42,44,46)]
 total_cyano<-merge(x = df1, y = seq_sub, by = "key", all.x = TRUE)
 
 #### Create a 2nd dataframe with Genus-specific abundance data ####
@@ -472,7 +472,7 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 # normality will be checked for additional variables as they come up
 
 
-##### Apply Transformations #####
+##### Apply Transformations and export files#####
 total_cyano$LogAbs_440<-log10(total_cyano$Abs_440 + 0.001)
 total_cyano$LogAbs_750<-log10(total_cyano$Abs_750 + 0.001)
 total_cyano$LogTSS<-log10(total_cyano$TSS_gL + 0.001)
