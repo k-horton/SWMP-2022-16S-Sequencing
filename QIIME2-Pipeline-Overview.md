@@ -19,7 +19,7 @@ Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from
 
      *(Files: initial_primer_trim.sh and multi_job_initial_primer_trim.sh)*
    
-  - Manifest file with locations of sequences created before next step.
+  -- Manifest file with locations of sequences created before next step.
   
        *(Files: manifest_filecreate_initial_trim.sh, manifest_file_initial_trim.sh,  multi_job_manifest_initial_trim.sh)*
        
