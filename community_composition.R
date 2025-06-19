@@ -18,7 +18,7 @@ genus_data$Date<-factor(genus_data$Date,
                      labels = c("June 23rd", "July 20th", "Aug 3rd",
                                 "Aug 23rd","Aug 31st",  "Sept 27th"))
 
-cyano_abund<-pivot_wider(genus_data[c(3,59,60,61,62,63)], 
+cyano_abund<-pivot_wider(genus_data[c(3,60:64)], 
                    id_cols = c("Class", "Order","Family", "Genus"), 
                    names_from = "Date", names_sort = TRUE,
                    values_from = "genus_abundance",
@@ -28,7 +28,7 @@ excel_output_path <- paste0(dir,"/stats/cyano_abund_DATE_16S_sequencing.xlsx")
 write_xlsx(cyano_abund, path = excel_output_path)
 
 
-cyano_abund<-pivot_wider(genus_data[c(4,59,60,61,62,63)], 
+cyano_abund<-pivot_wider(genus_data[c(4,60:64)], 
                          id_cols = c("Class", "Order","Family", "Genus"), 
                          names_from = "IDL", names_sort = TRUE,
                          values_from = "genus_abundance",
@@ -42,7 +42,7 @@ write_xlsx(cyano_abund, path = excel_output_path)
 join_data<-read_excel(paste0(dir,"/total_cyano_df.xlsx"))
 
 #### subset data ####
-dataset <- join_data[c(3:5,14,40,47:50,99:102)]
+dataset <- join_data[c(3:5,14,40,47:50,98:101)]
 # set date as a factor and order chronologically
 dataset$Date<-factor(dataset$Date,
                    levels=c("June 23rd","July 20th","Aug 3rd",
