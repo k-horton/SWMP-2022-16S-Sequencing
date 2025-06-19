@@ -78,23 +78,28 @@ con_data1<- cyano_abund[c(3,7:55)]%>%
   group_by(Sample) %>%
   summarize(across(Abundance, sum), .groups="drop")
 
-con_data2<-unique(cyano_abund[c(7, 12:53)])
+con_data2<-unique(cyano_abund[c(7,10, 12:53)])
 
 gen_cyano<-merge(con_data1, con_data2, by = "Sample")}
+# Adjust abundance based on initial DNA concentration of sample
+gen_cyano$Abundance<-gen_cyano$Abundance / gen_cyano$q_conc
 dir<-getwd()
 excel_output_path <- paste0(dir,"/class_lev_cyano.xlsx")
 write_xlsx(gen_cyano, path = excel_output_path)
 
-# create a dataframe with all class, order, family, genus info
-spec_cyano<-cyano_abund[c(3:6,8,10,12,13)]
+# create a dataframe with all taxa info
+spec_cyano<-cyano_abund[c(1:6,8,10,12,13)]
 
-#drop zero values
+# Adjust abundance based on initial DNA concentration of sample
+spec_cyano$Abundance<-spec_cyano$Abundance / spec_cyano$q_conc
+#drop zero values + NAs
 spec_cyano<- spec_cyano[which(spec_cyano$Abundance!=0), ]
+spec_cyano<- drop_na(spec_cyano, Abundance)
 
 excel_output_path <- paste0(dir,"/all_lev_cyano.xlsx")
 write_xlsx(spec_cyano, path = excel_output_path)
 
-#### Read in WQ data and merge w/ other microbial data  ####
+#### Read in WQ data and merge w/ class level sequencing data  ####
 dir<-getwd()
 seq<-read_excel(paste0(dir,"/class_lev_cyano.xlsx"))
 df1<-read_excel(paste0(dir,"/swmp.xlsx"))
@@ -102,7 +107,7 @@ df1<-read_excel(paste0(dir,"/swmp.xlsx"))
 seq$key<-paste(seq$Date,"-" ,seq$IDL) 
 df1$key<-paste(df1$Date,"-" ,df1$IDL) 
 
-# merge seq data w/ swmp data
+# merge seq data w/ WQ data
 seq_sub<-seq[c(2,41,42,44,45)]
 total_cyano<-merge(x = df1, y = seq_sub, by = "key", all.x = TRUE)
 
@@ -116,8 +121,7 @@ df2$key<-paste(df2$Date,"-",df2$IDL)
 #rename abundance columns in both dataframes
 df2<-rename(df2,t_cyano_abundance = Abundance)
 seq2<-rename(seq2,genus_abundance = Abundance)
-
-seq_sub<-seq2[c(1:6, 9)]
+seq_sub<-seq2[c(1:8, 11)]
 genus_cyano<-merge(x = df2, y = seq_sub, by = "key", all.x = TRUE)
 
 #### Assign labels to categorical variables ####
