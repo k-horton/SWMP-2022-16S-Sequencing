@@ -19,7 +19,9 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
     *(File: decontam_freq.R, decontam_prev.R)*
 
-5.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
+   Now that the dataframe has been cleaned up, use the file "prepare_dataframe.R" to quickly prepare microtable and WQ data for analyses.
+
+6.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
 
     *(File: cyano_abund.R)*
 
