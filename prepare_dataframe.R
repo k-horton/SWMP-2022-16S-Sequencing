@@ -523,7 +523,7 @@ qqPlot(res_aov$residuals, add.line = TRUE)
 # not completely normal, more normal than data that was not summed
 
 # try log transformation
-res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_cyano_abund)
+res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_cyano_abund)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -539,7 +539,7 @@ par(mfrow = c(1, 2))
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals, add.line = TRUE)
 
-res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_genus_drop)
+res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_genus_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -551,15 +551,15 @@ par(mfrow = c(1, 2))
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals, add.line = TRUE)
 
-res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_family_drop)
+res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_family_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # Apply transformations
-family_long$logAbund<-log10(family_long$Prop_abund)
-genus_long$logAbund<-log10(genus_long$Prop_abund)
-cyano_abund$logAbund<-log10(cyano_abund$Prop_abund)
+family_long$logAbund<-log10(family_long$Prop_abund+0.01)
+genus_long$logAbund<-log10(genus_long$Prop_abund+0.01)
+cyano_abund$logAbund<-log10(cyano_abund$Prop_abund+0.01)
 #### Output dataframes ####
 # Merge WQ data with abundance data
 wq_genus_merge <- merge(genus_long, wq_data, by=1, all=TRUE) 
