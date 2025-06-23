@@ -295,7 +295,6 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 # this is better, use log transformation
 # So, to summarize, the following transformations will be applied when conducting
 #   parametric statistical tests:
-#   - Abundance         ->  log10(Abundance+0.1)
 #   - Chlorophyll-a     ->  log10(Chla_gL+0.01) 
 #   - Unicellular cells ->  log10(Unicellularcells_L+0.01)
 #   - Colonial cells    ->  log10(Colonialcells_L+0.01) 
@@ -497,7 +496,8 @@ family_merge <- merge(family_pivot, library_size, by=1, all=TRUE)
 #       Relative Abundance(ASV1) = N(ASV1) / (N(ASV1)+N(ASV2)+...N(ASVn))
 
 # General cyanobacteria
-cyano_abund$Prop_abund<-cyano_abund$Cyanobacteria / cyano_abund$library_size
+cyano_abund$Prop_abund_cyano<-cyano_abund$Cyanobacteria / cyano_abund$library_size
+cyano_abund$Prop_abund_bact<-cyano_abund$'Other Bacteria' / cyano_abund$library_size
 
 # Genus
 genus_long<-pivot_longer(genus_merge, cols=c(2:32), 
@@ -514,7 +514,7 @@ family_long$Prop_abund<-family_long$Abundance / family_long$library_size
 #### Check normality of abundance data ####
 # check normality
 wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
-res_aov <- aov(Prop_abund ~ Date, data = wq_cyano_abund)
+res_aov <- aov(Prop_abund_cyano ~ Date, data = wq_cyano_abund)
 par(mfrow = c(1, 2)) 
 # histogram
 hist(res_aov$residuals)
@@ -523,7 +523,7 @@ qqPlot(res_aov$residuals, add.line = TRUE)
 # not completely normal, more normal than data that was not summed
 
 # try log transformation
-res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_cyano_abund)
+res_aov <- aov(log10(Prop_abund_cyano+0.01) ~ Date,  data = wq_cyano_abund)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -559,7 +559,9 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 # Apply transformations
 family_long$logAbund<-log10(family_long$Prop_abund+0.01)
 genus_long$logAbund<-log10(genus_long$Prop_abund+0.01)
-cyano_abund$logAbund<-log10(cyano_abund$Prop_abund+0.01)
+cyano_abund$logAbund_cyano<-log10(cyano_abund$Prop_abund_cyano+0.01)
+cyano_abund$logAbund_bact<-log10(cyano_abund$Prop_abund_bact+0.01)
+
 #### Output dataframes ####
 # Merge WQ data with abundance data
 wq_genus_merge <- merge(genus_long, wq_data, by=1, all=TRUE) 
