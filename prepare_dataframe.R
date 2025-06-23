@@ -503,11 +503,14 @@ cyano_abund$Prop_abund_bact<-cyano_abund$'Other Bacteria' / cyano_abund$library_
 genus_long<-pivot_longer(genus_merge, cols=c(2:32), 
                          names_to="Genus",  values_to="Abundance")
 genus_long$Prop_abund<-genus_long$Abundance / genus_long$library_size
+# drop zeroes
+genus_long<-genus_long[genus_long$Abundance!=0,]
 
 # Family
 family_long<-pivot_longer(family_merge, cols=c(2:14), 
                           names_to="Family", values_to="Abundance")
 family_long$Prop_abund<-family_long$Abundance / family_long$library_size
+family_long<-family_long[family_long$Abundance!=0,]
 
 
 
