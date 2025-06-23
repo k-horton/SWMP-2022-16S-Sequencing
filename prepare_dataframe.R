@@ -464,33 +464,37 @@ name_change<-read_excel(paste0(dir,"/Taxa_name_changes2.xlsx"))
 name_change$Genus<-name_change$Orig_Genus
 name_change$Family<-name_change$Orig_Family
 
+seq_data<-name_change[c(4:9)]
+seq_data<-rename(seq_data, "Genus"="New_Genus")
+
 merged_table <- merge(table_rename, name_change, by=c("Genus","Family"), all=TRUE) 
 #clean up table
 merged_table$Genus<-merged_table$New_Genus
 merged_table$Family<-merged_table$New_Family
-merged_table<-merged_table[c(1:2,4:72, 77:80)]
+merged_table<-merged_table[c(1:2,4:72,77:81)]
 
-genus_sample_reads<-merged_table[c(1, 3:71)] %>% 
+genus_sample_reads<-merged_table[c(1, 3:76)] %>% 
   group_by(Genus) %>% 
   summarise(across(c(1:69), sum))
 
-family_sample_reads<-merged_table[c(2:71)] %>% 
+family_sample_reads<-merged_table[c(2:76)] %>% 
   group_by(Family) %>% 
   summarise(across(c(1:69), sum))
 
-genus_pivot<-genus_sample_reads %>%
-  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") %>%
-  pivot_wider(names_from=Genus, values_from=Abundance)
+genus_seq<- left_join(genus_sample_reads, seq_data, by="Genus")
 
 family_pivot<-family_sample_reads %>%
-  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") %>%
-  pivot_wider(names_from=Family, values_from=Abundance)
+  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") 
+family_pivot<-family_pivot[family_pivot$Abundance!=0,]
+
+genus_pivot<-genus_seq %>%
+  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance")
+#drop zeroes
+genus_pivot<-genus_pivot[genus_pivot$Abundance!=0,]
 
 # Merge the abundance data with the total sample read count
-genus_merge <- merge(genus_pivot, library_size, by=1, all=TRUE) 
-family_merge <- merge(family_pivot, library_size, by=1, all=TRUE) 
-
-
+genus_merge <- left_join(genus_pivot, library_size, by="Sample") 
+family_merge <- merge(family_pivot, library_size, by="Sample", all=TRUE) 
 #### Proportion normalization ####
 # Equation:
 #       Relative Abundance(ASV1) = N(ASV1) / (N(ASV1)+N(ASV2)+...N(ASVn))
@@ -500,19 +504,10 @@ cyano_abund$Prop_abund_cyano<-cyano_abund$Cyanobacteria / cyano_abund$library_si
 cyano_abund$Prop_abund_bact<-cyano_abund$'Other Bacteria' / cyano_abund$library_size
 
 # Genus
-genus_long<-pivot_longer(genus_merge, cols=c(2:32), 
-                         names_to="Genus",  values_to="Abundance")
-genus_long$Prop_abund<-genus_long$Abundance / genus_long$library_size
-# drop zeroes
-genus_long<-genus_long[genus_long$Abundance!=0,]
+genus_merge$Prop_abund<-genus_merge$Abundance / genus_merge$library_size
 
 # Family
-family_long<-pivot_longer(family_merge, cols=c(2:14), 
-                          names_to="Family", values_to="Abundance")
-family_long$Prop_abund<-family_long$Abundance / family_long$library_size
-family_long<-family_long[family_long$Abundance!=0,]
-
-
+family_merge$Prop_abund<-family_merge$Abundance / family_merge$library_size
 
 #### Check normality of abundance data ####
 # check normality
@@ -535,7 +530,7 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 #      for parametric tests
 
 #double check genus and family data
-wq_genus_merge <- merge(genus_long, wq_data, by="Sample", all=TRUE) 
+wq_genus_merge <- merge(genus_merge, wq_data, by="Sample", all=TRUE) 
 wq_genus_drop<-wq_genus_merge[wq_genus_merge$Abundance!=0,]
 res_aov <- aov(Prop_abund ~ Date, data = wq_genus_drop)
 par(mfrow = c(1, 2)) 
@@ -547,7 +542,7 @@ par(mfrow = c(1, 2))
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
-wq_family_merge <- merge(family_long, wq_data, by="Sample", all=TRUE) 
+wq_family_merge <- merge(family_merge, wq_data, by="Sample", all=TRUE) 
 wq_family_drop<-wq_family_merge[wq_family_merge$Abundance!=0,]
 res_aov <- aov(Prop_abund ~ Date, data = wq_family_drop)
 par(mfrow = c(1, 2)) 
@@ -560,16 +555,26 @@ hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # Apply transformations
-family_long$logAbund<-log10(family_long$Prop_abund+0.01)
-genus_long$logAbund<-log10(genus_long$Prop_abund+0.01)
+family_merge$logAbund<-log10(family_merge$Prop_abund+0.01)
+genus_merge$logAbund<-log10(genus_merge$Prop_abund+0.01)
 cyano_abund$logAbund_cyano<-log10(cyano_abund$Prop_abund_cyano+0.01)
 cyano_abund$logAbund_bact<-log10(cyano_abund$Prop_abund_bact+0.01)
 
 #### Output dataframes ####
 # Merge WQ data with abundance data
-wq_genus_merge <- merge(genus_long, wq_data, by=1, all=TRUE) 
-wq_family_merge <- merge(family_long, wq_data, by=1, all=TRUE) 
+wq_genus_merge <- merge(genus_merge, wq_data, by="Sample", all=TRUE) 
+wq_family_merge <- merge(family_merge, wq_data, by="Sample", all=TRUE) 
 wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
+
+# re-order data frames
+wq_genus_merge <- wq_genus_merge %>%
+  select(Sample, Date, IDL, everything())
+
+wq_family_merge <- wq_family_merge %>%
+  select(Sample, Date, IDL, everything())
+
+wq_cyano_abund<- wq_cyano_abund %>%
+  select(Sample, Date, IDL, everything())
 
 # Abundance data only
 write_xlsx(cyano_abund, path = paste0(dir,"/cyano_ASV_abundance.xlsx"))
