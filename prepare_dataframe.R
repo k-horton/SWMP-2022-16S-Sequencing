@@ -9,7 +9,7 @@ library(tidyr)
 library(dplyr)
 library(EnvStats)
 
-#### Prepare Taxonomy Data ####
+#### Prepare Microtable ####
 # First, load sequence data and remove contaminant samples as determined previously 
 # (see files decontam_prev.R, decontam_freq.R)
 {# Assign current working directory to 'dir'
@@ -57,182 +57,44 @@ library(EnvStats)
   no_ctrl$sample_table <- subset(no_ctrl$sample_table, Control == "FALSE")
   no_ctrl$tidy_dataset()
 }
-# Calculate abundance for all bacteria in the samples
-{bact<-clone(no_ctrl)
 
-bact$tax_table <- subset(bact$tax_table, Kingdom == "k__Bacteria")
-all_bact_abund <- trans_abund$new(dataset = bact, taxrank = "Genus",
-                                  delete_taxonomy_lineage = FALSE,
-                                  delete_taxonomy_prefix = TRUE) 
-# separate taxonomy
-s_all_bact_abund<-separate_wider_delim(all_bact_abund$data_abund, cols = Taxonomy, delim = "|", 
-                                       names = c("Kingdom", "Phylum", "Class", "Order",
-                                                 "Family", "Genus"))
-}
-# Subset to just cyanobacteria
-{cyano_abund <- s_all_bact_abund[which(s_all_bact_abund$Class=="Cyanobacteriia"), ]
-# create dataframe simplified to class
-gen_cyano<-cyano_abund[c(3,7:55)]
+#### Read in WQ data  ####
+wq_data<-read_excel(paste0(dir,"/swmp.xlsx"))
+# Fix sample column of WQ data
+library(stringr)
+wq_data$Sample<-str_replace(wq_data$Sample, "_(\\d)", "\\1")
 
-con_data1<- cyano_abund[c(3,7:55)]%>%
-  group_by(Sample) %>%
-  summarize(across(Abundance, sum), .groups="drop")
-
-con_data2<-unique(cyano_abund[c(7,10, 12:53)])
-
-gen_cyano<-merge(con_data1, con_data2, by = "Sample")}
-# Adjust abundance based on initial DNA concentration of sample
-gen_cyano$Abundance<-gen_cyano$Abundance / gen_cyano$q_conc
-dir<-getwd()
-excel_output_path <- paste0(dir,"/class_lev_cyano.xlsx")
-write_xlsx(gen_cyano, path = excel_output_path)
-
-# create a dataframe with all taxa info
-spec_cyano<-cyano_abund[c(1:6,8,10,12,13)]
-
-# Adjust abundance based on initial DNA concentration of sample
-spec_cyano$Abundance<-spec_cyano$Abundance / spec_cyano$q_conc
-#drop zero values + NAs
-spec_cyano<- spec_cyano[which(spec_cyano$Abundance!=0), ]
-spec_cyano<- drop_na(spec_cyano, Abundance)
-
-excel_output_path <- paste0(dir,"/all_lev_cyano.xlsx")
-write_xlsx(spec_cyano, path = excel_output_path)
-
-#### Read in WQ data and merge w/ class level sequencing data  ####
-dir<-getwd()
-seq<-read_excel(paste0(dir,"/class_lev_cyano.xlsx"))
-df1<-read_excel(paste0(dir,"/swmp.xlsx"))
-
-seq$key<-paste(seq$Date,"-" ,seq$IDL) 
-df1$key<-paste(df1$Date,"-" ,df1$IDL) 
-
-# merge seq data w/ WQ data
-seq_sub<-seq[c(2,42,43,46)]
-total_cyano<-merge(x = df1, y = seq_sub, by = "key", all.x = TRUE)
-
-#### Create a 2nd dataframe with Genus-specific abundance data ####
-df2<-total_cyano
-seq2<-read_excel(paste0(dir,"/all_lev_cyano.xlsx"))
-
-# merge the WQ + micro data with the sequencing data
-seq2$key<-paste(seq2$Date,"-" ,seq2$IDL) 
-df2$key<-paste(df2$Date,"-",df2$IDL) 
-#rename abundance columns in both dataframes
-df2<-rename(df2,t_cyano_abundance = Abundance)
-seq2<-rename(seq2,genus_abundance = Abundance)
-seq_sub<-seq2[c(1:8, 11)]
-genus_cyano<-merge(x = df2, y = seq_sub, by = "key", all.x = TRUE)
-
-#### Assign labels to categorical variables ####
-total_cyano$Storm_Base<-factor(total_cyano$Storm_Base ,
-                        levels = c("Storm","Base"),
-                        labels = c("Stormflow","Low Flow"))
-
-total_cyano$Site<-factor(total_cyano$Site ,
-                  levels = c("in","pond","out"),
-                  labels = c("Inflow","Pond","Outflow"))
-
-total_cyano$Dredge_Cat<-factor(total_cyano$Dredge_Cat,
-                        levels = c("Recent", "Needs Dredging"),
-                        labels = c("Recently Dredged", "Needs Dredging"))
-
-total_cyano$Pre_2003<-factor(total_cyano$Pre_2003,
-                      levels = c("Yes", "No"),
-                      labels = c("Built Pre-2003", "Built Post-2003"))
-
-genus_cyano$Storm_Base<-factor(genus_cyano$Storm_Base ,
-                       levels = c("Storm","Base"),
-                       labels = c("Stormflow","Low Flow"))
-
-genus_cyano$Site<-factor(genus_cyano$Site ,
-                 levels = c("in","pond","out"),
-                 labels = c("Inflow","Pond","Outflow"))
-
-genus_cyano$Dredge_Cat<-factor(genus_cyano$Dredge_Cat,
-                       levels = c("Recent", "Needs Dredging"),
-                       labels = c("Recently Dredged", "Needs Dredging"))
-
-genus_cyano$Pre_2003<-factor(genus_cyano$Pre_2003,
-                     levels = c("Yes", "No"),
-                     labels = c("Built Pre-2003", "Built Post-2003"))
-
-
-#### Calculate additional variables for both datasets ####
+#### Calculate additional variables ####
 # Dissolved inorganic nitrogen
-total_cyano$DIN<-(total_cyano$Nitrate_mgL+total_cyano$Nitrite_mgL+total_cyano$Ammonia_Ammonium_mgL)
+wq_data$DIN<-(wq_data$Nitrate_mgL+wq_data$Nitrite_mgL+wq_data$Ammonia_Ammonium_mgL)
 # Separate NH4 + NH3
-total_cyano$pka <- 0.09018 + (2729.92/(total_cyano$Temp_C +273.15))
-total_cyano$f_NH3 <- 1/(10^(total_cyano$pka - total_cyano$pH)+1)
-total_cyano$NH3_mgL <- total_cyano$Ammonia_Ammonium_mgL*total_cyano$f_NH3
-total_cyano$NH4_mgL<-total_cyano$Ammonia_Ammonium_mgL - total_cyano$NH3_mgL
+wq_data$pka <- 0.09018 + (2729.92/(wq_data$Temp_C +273.15))
+wq_data$f_NH3 <- 1/(10^(wq_data$pka - wq_data$pH)+1)
+wq_data$NH3_mgL <- wq_data$Ammonia_Ammonium_mgL*wq_data$f_NH3
+wq_data$NH4_mgL<-wq_data$Ammonia_Ammonium_mgL - wq_data$NH3_mgL
 # Nitrogen species : TN ration
-total_cyano$NO3_TN<-total_cyano$Nitrate_mgL / total_cyano$Total_N_mgL
-total_cyano$NO2_TN<-total_cyano$Nitrite_mgL / total_cyano$Total_N_mgL
-total_cyano$ON_TN<-total_cyano$Organic_N_mgL / total_cyano$Total_N_mgL
-total_cyano$NH3NH4_TN<-total_cyano$Ammonia_Ammonium_mgL / total_cyano$Total_N_mgL
-total_cyano$NH3_TN <- total_cyano$NH3_mgL / total_cyano$Total_N_mgL
-total_cyano$NH4_TN <- total_cyano$NH4_mgL / total_cyano$Total_N_mgL
+wq_data$NO3_TN<-wq_data$Nitrate_mgL / wq_data$Total_N_mgL
+wq_data$NO2_TN<-wq_data$Nitrite_mgL / wq_data$Total_N_mgL
+wq_data$ON_TN<-wq_data$Organic_N_mgL / wq_data$Total_N_mgL
+wq_data$NH3NH4_TN<-wq_data$Ammonia_Ammonium_mgL / wq_data$Total_N_mgL
+wq_data$NH3_TN <- wq_data$NH3_mgL / wq_data$Total_N_mgL
+wq_data$NH4_TN <- wq_data$NH4_mgL / wq_data$Total_N_mgL
 # TOSS : TSS ratio
-total_cyano$TOSS_TSS <- total_cyano$TOSS_gL / total_cyano$TSS_gL
+wq_data$TOSS_TSS <- wq_data$TOSS_gL / wq_data$TSS_gL
 # TN : TP ratio
-total_cyano$TN_TP <- total_cyano$Total_N_mgL / (total_cyano$TP_ugL*0.001) # <- need to convert to mg/L
+wq_data$TN_TP <- wq_data$Total_N_mgL / (wq_data$TP_ugL*0.001) # <- need to convert to mg/L
 # change any infinite values generated to NA
-is.na(total_cyano) <- sapply(total_cyano, is.infinite)
-
-# Dissolved inorganic nitrogen
-genus_cyano$DIN<-(genus_cyano$Nitrate_mgL+genus_cyano$Nitrite_mgL+genus_cyano$Ammonia_Ammonium_mgL)
-# Separate NH4 + NH3
-genus_cyano$pka <- 0.09018 + (2729.92/(genus_cyano$Temp_C +273.15))
-genus_cyano$f_NH3 <- 1/(10^(genus_cyano$pka - genus_cyano$pH)+1)
-genus_cyano$NH3_mgL <- genus_cyano$Ammonia_Ammonium_mgL*genus_cyano$f_NH3
-genus_cyano$NH4_mgL<-genus_cyano$Ammonia_Ammonium_mgL - genus_cyano$NH3_mgL
-# Nitrogen species : TN ration
-genus_cyano$NO3_TN<-genus_cyano$Nitrate_mgL / genus_cyano$Total_N_mgL
-genus_cyano$NO2_TN<-genus_cyano$Nitrite_mgL / genus_cyano$Total_N_mgL
-genus_cyano$ON_TN<-genus_cyano$Organic_N_mgL / genus_cyano$Total_N_mgL
-genus_cyano$NH3NH4_TN<-genus_cyano$Ammonia_Ammonium_mgL / genus_cyano$Total_N_mgL
-genus_cyano$NH3_TN <- genus_cyano$NH3_mgL / genus_cyano$Total_N_mgL
-genus_cyano$NH4_TN <- genus_cyano$NH4_mgL / genus_cyano$Total_N_mgL
-# TOSS : TSS ratio
-genus_cyano$TOSS_TSS <- genus_cyano$TOSS_gL / genus_cyano$TSS_gL
-# TN : TP ratio
-genus_cyano$TN_TP <- genus_cyano$Total_N_mgL / (genus_cyano$TP_ugL*0.001) # <- need to convert to mg/L
-# change any infinite values generated to NA
-is.na(genus_cyano) <- sapply(genus_cyano, is.infinite)
+is.na(wq_data) <- sapply(wq_data, is.infinite)
 
 #### Check normality of the data #####
-# check normality
-res_aov <- aov(Abundance ~ Date,
-               data = total_cyano)
-par(mfrow = c(1, 2)) 
-# histogram
-hist(res_aov$residuals)
-# QQ-plot
-qqPlot(res_aov$residuals, add.line = TRUE)
-# not completely normal, more normal than data that was not summed
-
-# try log transformation
-
-res_aov <- aov(log10(Abundance+0.1) ~ Date,
-               data = total_cyano)
-par(mfrow = c(1, 2)) 
-hist(res_aov$residuals)
-qqPlot(res_aov$residuals,   add.line = TRUE)
-
-# This is much more normal - use log transformation moving forward
-#      for parametric tests
-
 # Chlorophyll-a #
-res_aov <- aov(Chla_gL ~ Date,
-               data = total_cyano)
+res_aov <- aov(Chla_gL ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Chla_gL+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(Chla_gL+0.01) ~ Date,   data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -240,50 +102,44 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 # This is better - use log transformation 
 
 # Unicellular cyanobacteria cells #
-res_aov <- aov(Unicellularcells_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(Unicellularcells_L ~ Date,    data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Unicellularcells_L+0.1) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(Unicellularcells_L+0.1) ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # drop zero values and re-check
-total_cyano_sub<-total_cyano
-total_cyano_sub$Unicellularcells_L[total_cyano_sub$Unicellularcells_L==0] <- NA
-total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+wq_data_sub<-wq_data
+wq_data_sub$Unicellularcells_L[wq_data_sub$Unicellularcells_L==0] <- NA
+wq_data_sub<-wq_data_sub[complete.cases(wq_data_sub),]
 
-res_aov <- aov(Unicellularcells_L ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(Unicellularcells_L ~ Date,  data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
 res_aov <- aov(log10(Unicellularcells_L+0.01) ~ Date,
-               data = total_cyano_sub)
+               data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 #this looks good! Use log transformation
 
-
 # Colonial cyanobacteria cells #
-res_aov <- aov(Colonialcells_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(Colonialcells_L ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Colonialcells_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(Colonialcells_L+0.01) ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -291,55 +147,49 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 
 
 # Filamentous cyanobacteria cells #
-res_aov <- aov(Filamentouscells_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(Filamentouscells_L ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Filamentouscells_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(Filamentouscells_L+0.01) ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 # This is questionable, try some other transformations:
 
 # root transformation -> x^(1/2)
-res_aov <- aov((Filamentouscells_L+0.01)^(1/2) ~ Date,
-               data = total_cyano)
+res_aov <- aov((Filamentouscells_L+0.01)^(1/2) ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # reciprocal transformation -> 1/x
-res_aov <- aov(1/(Filamentouscells_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(1/(Filamentouscells_L+0.01) ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # squared transformation -> x^2
 res_aov <- aov((Filamentouscells_L+0.01)^(2) ~ Date,
-               data = total_cyano)
+               data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # drop zero values and re-check
-total_cyano_sub<-total_cyano
-total_cyano_sub$Filamentouscells_L[total_cyano_sub$Filamentouscells_L==0] <- NA
-total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+wq_data_sub<-wq_data
+wq_data_sub$Filamentouscells_L[wq_data_sub$Filamentouscells_L==0] <- NA
+wq_data_sub<-wq_data_sub[complete.cases(wq_data_sub),]
 
-res_aov <- aov(Filamentouscells_L ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(Filamentouscells_L ~ Date,   data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Filamentouscells_L+0.01) ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(log10(Filamentouscells_L+0.01) ~ Date, data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -347,111 +197,97 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 #this looks good! Use log transformation
 
 # Total cyanobacteria cells #
-res_aov <- aov(Totalcells_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(Totalcells_L ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(Totalcells_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(Totalcells_L+0.01) ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 # This is better - use log transformation 
 
 # 16S copies / L #
-res_aov <- aov(copies_16S_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(copies_16S_L ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(copies_16S_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(copies_16S_L+0.01) ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # drop zero values and re-check
-total_cyano_sub<-total_cyano
-total_cyano_sub$copies_16S_L[total_cyano_sub$copies_16S_L==0] <- NA
-total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+wq_data_sub<-wq_data
+wq_data_sub$copies_16S_L[wq_data_sub$copies_16S_L==0] <- NA
+wq_data_sub<-wq_data_sub[complete.cases(wq_data_sub),]
 
-res_aov <- aov(copies_16S_L ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(copies_16S_L ~ Date,data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
-res_aov <- aov(log10(copies_16S_L+0.01) ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(log10(copies_16S_L+0.01) ~ Date, data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 # this is good, use log transformation
 
 # mcyE copies / L #
-res_aov <- aov(copies_mcyE_L ~ Date,
-               data = total_cyano)
+res_aov <- aov(copies_mcyE_L ~ Date,   data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,    data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # drop zero values and re-check
-total_cyano_sub<-total_cyano
-total_cyano_sub$copies_mcyE_L[total_cyano_sub$copies_mcyE_L==0] <- NA
-total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+wq_data_sub<-wq_data
+wq_data_sub$copies_mcyE_L[wq_data_sub$copies_mcyE_L==0] <- NA
+wq_data_sub<-wq_data_sub[complete.cases(wq_data_sub),]
 
-res_aov <- aov(copies_mcyE_L ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(copies_mcyE_L ~ Date, data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
-res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(log10(copies_mcyE_L+0.01) ~ Date,   data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 # this is better, use log transformation
 
 # mcyE copies : 16S copies #
-res_aov <- aov(mcyE_16S_ratio ~ Date,
-               data = total_cyano)
+res_aov <- aov(mcyE_16S_ratio ~ Date,    data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date,
-               data = total_cyano)
+res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date, data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # drop zero values and re-check
-total_cyano_sub<-total_cyano
-total_cyano_sub$mcyE_16S_ratio[total_cyano_sub$mcyE_16S_ratio==0] <- NA
-total_cyano_sub<-total_cyano_sub[complete.cases(total_cyano_sub),]
+wq_data_sub<-wq_data
+wq_data_sub$mcyE_16S_ratio[wq_data_sub$mcyE_16S_ratio==0] <- NA
+wq_data_sub<-wq_data_sub[complete.cases(wq_data_sub),]
 
-res_aov <- aov(mcyE_16S_ratio ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(mcyE_16S_ratio ~ Date,  data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
-res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date,
-               data = total_cyano_sub)
+res_aov <- aov(log10(mcyE_16S_ratio+0.01) ~ Date,data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -469,86 +305,273 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 #   - mcyE copies       ->  log10(copies_mcyE_L+0.01) 
 #   - mcyE : 16S copies ->  log10(mcyE_16S_ratio+0.01) 
 
-# normality will be checked for additional variables as they come up
+
+#### Transform data ####
+wq_data$LogAbs_440<-log10(wq_data$Abs_440 + 0.001)
+wq_data$LogAbs_750<-log10(wq_data$Abs_750 + 0.001)
+wq_data$LogTSS<-log10(wq_data$TSS_gL + 0.001)
+wq_data$LogTOSS<-log10(wq_data$TOSS_gL + 0.001)
+wq_data$LogCl<-log10(wq_data$Cl_mgL + 0.1)
+wq_data$LogTP<-log10(wq_data$TP_ugL + 0.1)
+wq_data$LogTDP<-log10(wq_data$TDP_ugL + 0.1)
+wq_data$LogTKN<-log10(wq_data$Total_Kjeldahl_N_mgL + 0.1)
+wq_data$LogNH3NH4<-log10(wq_data$Ammonia_Ammonium_mgL + 0.01)
+wq_data$LogNO3<-log10(wq_data$Nitrate_mgL + 0.001)
+wq_data$LogNO2<-log10(wq_data$Nitrite_mgL + 0.001)
+wq_data$LogON<-log10(wq_data$Organic_N_mgL + 0.1)
+wq_data$LogTN<-log10(wq_data$Total_N_mgL + 0.01)
+wq_data$LogDIN<-log10(wq_data$DIN + 0.001)
+wq_data$LogChla<-log10(wq_data$Chla_gL + 0.001)
+wq_data$LogNH3<-log10(wq_data$NH3_mgL + 0.0001)
+wq_data$LogNH4<-log10(wq_data$NH4_mgL + 0.01)
+wq_data$LogNO3_TN<-log10(wq_data$NO3_TN + 0.001)
+wq_data$LogNO2_TN<-log10(wq_data$NO2_TN + 0.01)
+wq_data$LogNH3NH4_TN<-log10(wq_data$NH3NH4_TN + 0.01)
+wq_data$LogNH3_TN<-log10(wq_data$NH3_TN + 0.001)
+wq_data$LogNH4_TN<-log10(wq_data$NH4_TN + 0.01)
+wq_data$LogTN_TP<-log10(wq_data$TN_TP + 0.1)
+
+wq_data$logChla<-log10(wq_data$Chla_gL+0.01)
+
+wq_data$log16S<-log10(wq_data$copies_16S_L+0.01)
+wq_data$logmcyE<-log10(wq_data$copies_mcyE_L+0.01)
+wq_data$logU_cyano<-log10(wq_data$Unicellularcells_L+0.01)
+wq_data$logC_cyano<-log10(wq_data$Colonialcells_L+0.01)
+wq_data$logF_cyano<-log10(wq_data$Filamentouscells_L+0.01)
+wq_data$logT_cyano<-log10(wq_data$Totalcells_L+0.01)
+wq_data$logmcyE_16S<-log10(wq_data$mcyE_16S_ratio+0.01)
+wq_data$logHet<-log10(wq_data$Total_Het_L+0.01)
+
+#### Assign labels to categorical variables ####
+wq_data$Storm_Base<-factor(wq_data$Storm_Base ,
+                               levels = c("Storm","Base"),
+                               labels = c("Stormflow","Low Flow"))
+
+wq_data$Site<-factor(wq_data$Site ,
+                         levels = c("in","pond","out"),
+                         labels = c("Inflow","Pond","Outflow"))
+
+wq_data$Dredge_Cat<-factor(wq_data$Dredge_Cat,
+                               levels = c("Recent", "Needs Dredging"),
+                               labels = c("Recently Dredged", "Needs Dredging"))
+
+wq_data$Pre_2003<-factor(wq_data$Pre_2003,
+                             levels = c("Yes", "No"),
+                             labels = c("Built Pre-2003", "Built Post-2003"))
 
 
-##### Apply Transformations and export files#####
-total_cyano$LogAbs_440<-log10(total_cyano$Abs_440 + 0.001)
-total_cyano$LogAbs_750<-log10(total_cyano$Abs_750 + 0.001)
-total_cyano$LogTSS<-log10(total_cyano$TSS_gL + 0.001)
-total_cyano$LogTOSS<-log10(total_cyano$TOSS_gL + 0.001)
-total_cyano$LogCl<-log10(total_cyano$Cl_mgL + 0.1)
-total_cyano$LogTP<-log10(total_cyano$TP_ugL + 0.1)
-total_cyano$LogTDP<-log10(total_cyano$TDP_ugL + 0.1)
-total_cyano$LogTKN<-log10(total_cyano$Total_Kjeldahl_N_mgL + 0.1)
-total_cyano$LogNH3NH4<-log10(total_cyano$Ammonia_Ammonium_mgL + 0.01)
-total_cyano$LogNO3<-log10(total_cyano$Nitrate_mgL + 0.001)
-total_cyano$LogNO2<-log10(total_cyano$Nitrite_mgL + 0.001)
-total_cyano$LogON<-log10(total_cyano$Organic_N_mgL + 0.1)
-total_cyano$LogTN<-log10(total_cyano$Total_N_mgL + 0.01)
-total_cyano$LogDIN<-log10(total_cyano$DIN + 0.001)
-total_cyano$LogChla<-log10(total_cyano$Chla_gL + 0.001)
-total_cyano$LogNH3<-log10(total_cyano$NH3_mgL + 0.0001)
-total_cyano$LogNH4<-log10(total_cyano$NH4_mgL + 0.01)
-total_cyano$LogNO3_TN<-log10(total_cyano$NO3_TN + 0.001)
-total_cyano$LogNO2_TN<-log10(total_cyano$NO2_TN + 0.01)
-total_cyano$LogNH3NH4_TN<-log10(total_cyano$NH3NH4_TN + 0.01)
-total_cyano$LogNH3_TN<-log10(total_cyano$NH3_TN + 0.001)
-total_cyano$LogNH4_TN<-log10(total_cyano$NH4_TN + 0.01)
-total_cyano$LogTN_TP<-log10(total_cyano$TN_TP + 0.1)
+#### Calculate abundance data ####
+all_bact<-clone(no_ctrl)
+all_bact$tax_table<-subset(all_bact$tax_table, Kingdom=="k__Bacteria")
 
-total_cyano$logChla<-log10(total_cyano$Chla_gL+0.01)
-total_cyano$logAbund<-log10(total_cyano$Abundance + 0.1)
-total_cyano$log16S<-log10(total_cyano$copies_16S_L+0.01)
-total_cyano$logmcyE<-log10(total_cyano$copies_mcyE_L+0.01)
-total_cyano$logU_cyano<-log10(total_cyano$Unicellularcells_L+0.01)
-total_cyano$logC_cyano<-log10(total_cyano$Colonialcells_L+0.01)
-total_cyano$logF_cyano<-log10(total_cyano$Filamentouscells_L+0.01)
-total_cyano$logT_cyano<-log10(total_cyano$Totalcells_L+0.01)
-total_cyano$logmcyE_16S<-log10(total_cyano$mcyE_16S_ratio+0.01)
-total_cyano$logHet<-log10(total_cyano$Total_Het_L+0.01)
+# There are a few things we need to extract here:
+#   1. Overall library size for each sample
+#   2. Relative abundance of cyanobacteria as a whole out of entire library for each sample.
+#   3. Relative abundance of individual cyano taxa out of entire library for each sample
 
+# 1. Overall library size for each sample
 
+# reads
+otu_table<-all_bact$otu_table
 
-write_xlsx(total_cyano,paste0(dir,"/total_cyano_df.xlsx"))
+library_size<-colSums(otu_table[c(1:69)])
+print(library_size)
+library_size<-as.data.frame(library_size)
+library_size<- data.frame(Sample = row.names(library_size), library_size, row.names=NULL)
 
+dir<-getwd()
+write_xlsx(library_size, path = paste0(dir,"/library_size.xlsx"))
 
+#   2. Relative abundance of cyanobacteria as a whole out of entire library for each sample.
 
-genus_cyano$LogAbs_440<-log10(genus_cyano$Abs_440 + 0.001)
-genus_cyano$LogAbs_750<-log10(genus_cyano$Abs_750 + 0.001)
-genus_cyano$LogTSS<-log10(genus_cyano$TSS_gL + 0.001)
-genus_cyano$LogTOSS<-log10(genus_cyano$TOSS_gL + 0.001)
-genus_cyano$LogCl<-log10(genus_cyano$Cl_mgL + 0.1)
-genus_cyano$LogTP<-log10(genus_cyano$TP_ugL + 0.1)
-genus_cyano$LogTDP<-log10(genus_cyano$TDP_ugL + 0.1)
-genus_cyano$LogTKN<-log10(genus_cyano$Total_Kjeldahl_N_mgL + 0.1)
-genus_cyano$LogNH3NH4<-log10(genus_cyano$Ammonia_Ammonium_mgL + 0.01)
-genus_cyano$LogNO3<-log10(genus_cyano$Nitrate_mgL + 0.001)
-genus_cyano$LogNO2<-log10(genus_cyano$Nitrite_mgL + 0.001)
-genus_cyano$LogON<-log10(genus_cyano$Organic_N_mgL + 0.1)
-genus_cyano$LogTN<-log10(genus_cyano$Total_N_mgL + 0.01)
-genus_cyano$LogDIN<-log10(genus_cyano$DIN + 0.001)
-genus_cyano$LogChla<-log10(genus_cyano$Chla_gL + 0.001)
-genus_cyano$LogNH3<-log10(genus_cyano$NH3_mgL + 0.0001)
-genus_cyano$LogNH4<-log10(genus_cyano$NH4_mgL + 0.01)
-genus_cyano$LogNO3_TN<-log10(genus_cyano$NO3_TN + 0.001)
-genus_cyano$LogNO2_TN<-log10(genus_cyano$NO2_TN + 0.01)
-genus_cyano$LogNH3NH4_TN<-log10(genus_cyano$NH3NH4_TN + 0.01)
-genus_cyano$LogNH3_TN<-log10(genus_cyano$NH3_TN + 0.001)
-genus_cyano$LogNH4_TN<-log10(genus_cyano$NH4_TN + 0.01)
-genus_cyano$LogTN_TP<-log10(genus_cyano$TN_TP + 0.1)
+# reads
+head(otu_table, 3)
+# associated taxonomy
+tax_table<-all_bact$tax_table
 
-genus_cyano$logChla<-log10(genus_cyano$Chla_gL+0.01)
-genus_cyano$logTAbund<-log10(genus_cyano$t_cyano_abundance + 0.1)
-genus_cyano$logGAbund<-log10(genus_cyano$genus_abundance + 0.1)
-genus_cyano$log16S<-log10(genus_cyano$copies_16S_L+0.01)
-genus_cyano$logmcyE<-log10(genus_cyano$copies_mcyE_L+0.01)
-genus_cyano$logU_cyano<-log10(genus_cyano$Unicellularcells_L+0.01)
-genus_cyano$logC_cyano<-log10(genus_cyano$Colonialcells_L+0.01)
-genus_cyano$logF_cyano<-log10(genus_cyano$Filamentouscells_L+0.01)
-genus_cyano$logT_cyano<-log10(genus_cyano$Totalcells_L+0.01)
-genus_cyano$logmcyE_16S<-log10(genus_cyano$mcyE_16S_ratio+0.01)
-genus_cyano$logHet<-log10(genus_cyano$Total_Het_L+0.01)
+# Ensure the row names of otu_table match the row names of tax_table and re-order if necessary
+if (!all(rownames(otu_table) == rownames(tax_table))) {
+  warning("Rownames of otu_table and tax_table do not match exactly.
+          Reordering otu_table based on tax_table rownames.")
+  otu_table <- otu_table[rownames(tax_table), ]
+}
+
+# merge taxa and otu tables
+merged_table <- merge(tax_table, otu_table, by=0, all=TRUE) 
+write_xlsx(merged_table, path = paste0(dir,"/all_Bacteria_ASV_abundance.xlsx"))
+
+# Define function to clean up the taxonomic prefixes
+clean_taxa_name <- function(x) {
+  ifelse(grepl("__", x), sub("^[^_]*__", "", x), x)
+}
+
+# drop species and rownames columns
+table_rename<-merged_table[c(2:7,9:77)]
+
+table_rename2 <- table_rename %>%
+  mutate( 
+    # Apply cleaning to all relevant columns first if they contain prefixes like "g__"
+    across(c(Genus, Family, Order, Class, Phylum, Kingdom), clean_taxa_name),
+    # redefine the Genus column based on conditions
+    Genus = case_when(
+      # Class = Cyanobacteriia
+      (!is.na(Class) & (Class == "Cyanobacteriia" )) ~ paste0("Cyanobacteria"),
+      
+      # Class =/= Cyanobacteria
+      (!is.na(Class) & (Class != "Cyanobacteriia" )) ~ paste0("Other Bacteria"),
+      TRUE ~ "Unassigned_Taxa")
+  )
+
+cyano_vs_bact_sample_reads<-table_rename2[c(6:75)] %>% 
+  group_by(Genus) %>% 
+  summarise(across(everything(), sum))
 
 
-write_xlsx(genus_cyano,paste0(dir,"/genus_cyano_df.xlsx"))
+pivot<-pivot_longer(cyano_vs_bact_sample_reads, cols=c(2:70),
+                    names_to = "Sample", values_to = "Reads")
+
+pivot <- pivot %>% select(Sample, everything()) %>%pivot_wider(names_from="Genus", 
+                                                               values_from="Reads")
+# merge table w/ the total library size for each sample
+cyano_abund <- merge(pivot, library_size, by=1, all=TRUE) 
+
+#   3. Relative abundance of individual cyano taxa out of entire library for each sample
+
+otu_table<-all_bact$otu_table
+tax_table<-all_bact$tax_table
+
+# merge taxa and otu tables
+merged_table <- merge(tax_table, otu_table, by=0, all=TRUE) 
+
+cyano_sub<-subset(merged_table, Class == "c__Cyanobacteriia")
+
+# drop species, class, phylum, kingdom, and rownames columns
+table_rename<-cyano_sub[c(5:7,9:77)]
+print(unique(table_rename$Genus))
+#[1] "g__Leptolyngbya_ANT.L52.2"   "g__"                         "g__Cyanobium_PCC-6307"      
+#[4] "g__Phormidesmis_ANT.L52.6"   "g__RD011"                    "g__Synechocystis_PCC-6803"  
+#[7] "g__Calothrix_KVSF5"          "g__Phormidium_SAG_37.90"     "g__Aphanizomenon_NIES81"    
+#[10] "g__Cuspidothrix_LMECYA_163"  "g__Snowella_0TU37S04"        "g__Pseudanabaena_PCC-7429"  
+#[13] "g__Gloeotrichia_SAG_32.84"   "g__Leptolyngbya_PCC-6306"    "g__LB3-76"                  
+#[16] "g__Leptolyngbyaceae"         "g__Leptolyngbya_SAG_2411"    "g__Microcystis_PCC-7914"    
+#[19] "g__Planktothrix_NIVA-CYA_15" "g__MIZ36"                    "g__Nodosilinea_PCC-7104"    
+#[22] "g__JSC-12"                   "g__Schizothrix_LEGE_07164"   "g__Rivularia_PCC-7116"      
+#[25] "g__Microcystaceae"           "g__Limnothrix"               "g__SepB-3"                  
+#[28] "g__CENA359"                  "g__Tychonema_CCAP_1459-11B"  "g__Planktothricoides_SR001" 
+#[31] "g__Richelia_HH01"            "g__Nodosilineaceae"          "g__Cyanothece_PCC-8801"   
+
+# use updated (2025) taxa names determined through literature review to clean up remaining names
+name_change<-read_excel(paste0(dir,"/Taxa_name_changes2.xlsx"))
+name_change$Genus<-name_change$Orig_Genus
+name_change$Family<-name_change$Orig_Family
+
+merged_table <- merge(table_rename, name_change, by=c("Genus","Family"), all=TRUE) 
+#clean up table
+merged_table$Genus<-merged_table$New_Genus
+merged_table$Family<-merged_table$New_Family
+merged_table<-merged_table[c(1:2,4:72, 77:80)]
+
+genus_sample_reads<-merged_table[c(1, 3:71)] %>% 
+  group_by(Genus) %>% 
+  summarise(across(c(1:69), sum))
+
+family_sample_reads<-merged_table[c(2:71)] %>% 
+  group_by(Family) %>% 
+  summarise(across(c(1:69), sum))
+
+genus_pivot<-genus_sample_reads %>%
+  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") %>%
+  pivot_wider(names_from=Genus, values_from=Abundance)
+
+family_pivot<-family_sample_reads %>%
+  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") %>%
+  pivot_wider(names_from=Family, values_from=Abundance)
+
+# Merge the abundance data with the total sample read count
+genus_merge <- merge(genus_pivot, library_size, by=1, all=TRUE) 
+family_merge <- merge(family_pivot, library_size, by=1, all=TRUE) 
+
+
+#### Proportion normalization ####
+# Equation:
+#       Relative Abundance(ASV1) = N(ASV1) / (N(ASV1)+N(ASV2)+...N(ASVn))
+
+# General cyanobacteria
+cyano_abund$Prop_abund<-cyano_abund$Cyanobacteria / cyano_abund$library_size
+
+# Genus
+genus_long<-pivot_longer(genus_merge, cols=c(2:32), 
+                         names_to="Genus",  values_to="Abundance")
+genus_long$Prop_abund<-genus_long$Abundance / genus_long$library_size
+
+# Family
+family_long<-pivot_longer(family_merge, cols=c(2:14), 
+                          names_to="Family", values_to="Abundance")
+family_long$Prop_abund<-family_long$Abundance / family_long$library_size
+
+
+
+#### Check normality of abundance data ####
+# check normality
+wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
+res_aov <- aov(Prop_abund ~ Date, data = wq_cyano_abund)
+par(mfrow = c(1, 2)) 
+# histogram
+hist(res_aov$residuals)
+# QQ-plot
+qqPlot(res_aov$residuals, add.line = TRUE)
+# not completely normal, more normal than data that was not summed
+
+# try log transformation
+res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_cyano_abund)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# This is much more normal - use log transformation moving forward
+#      for parametric tests
+
+#double check genus and family data
+wq_genus_merge <- merge(genus_long, wq_data, by="Sample", all=TRUE) 
+wq_genus_drop<-wq_genus_merge[wq_genus_merge$Abundance!=0,]
+res_aov <- aov(Prop_abund ~ Date, data = wq_genus_drop)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals, add.line = TRUE)
+
+res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_genus_drop)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+wq_family_merge <- merge(family_long, wq_data, by="Sample", all=TRUE) 
+wq_family_drop<-wq_family_merge[wq_family_merge$Abundance!=0,]
+res_aov <- aov(Prop_abund ~ Date, data = wq_family_drop)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals, add.line = TRUE)
+
+res_aov <- aov(log10(Prop_abund+0.1) ~ Date,  data = wq_family_drop)
+par(mfrow = c(1, 2)) 
+hist(res_aov$residuals)
+qqPlot(res_aov$residuals,   add.line = TRUE)
+
+# Apply transformations
+family_long$logAbund<-log10(family_long$Prop_abund)
+genus_long$logAbund<-log10(genus_long$Prop_abund)
+cyano_abund$logAbund<-log10(cyano_abund$Prop_abund)
+#### Output dataframes ####
+# Merge WQ data with abundance data
+wq_genus_merge <- merge(genus_long, wq_data, by=1, all=TRUE) 
+wq_family_merge <- merge(family_long, wq_data, by=1, all=TRUE) 
+wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
+
+# Abundance data only
+write_xlsx(cyano_abund, path = paste0(dir,"/cyano_ASV_abundance.xlsx"))
+write_xlsx(genus_merge, path = paste0(dir,"/genus_cyano_ASV_abundance.xlsx"))
+write_xlsx(family_merge, path = paste0(dir,"/family_cyano_ASV_abundance.xlsx"))
+
+# Abundance + WQ data
+write_xlsx(wq_cyano_abund, path = paste0(dir,"/wq_cyano_ASV_abundance.xlsx"))
+write_xlsx(wq_genus_merge, path = paste0(dir,"/wq_genus_cyano_ASV_abundance.xlsx"))
+write_xlsx(wq_family_merge, path = paste0(dir,"/wq_family_cyano_ASV_abundance.xlsx"))
