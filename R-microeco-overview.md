@@ -19,7 +19,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
     *(File: decontam_freq.R, decontam_prev.R)*
 
-   Now that the dataframe has been cleaned up, use the file "prepare_dataframe.R" to quickly prepare microtable and WQ data for analyses.
+   Now that the dataframe has been cleaned up, use the file "prepare_dataframe.R" to quickly prepare microtable and WQ data for analyses. The abundance data was normalized by dividing the observed number of reads for the taxon of interest by the total number of observed reads in the library (sample). 
 
 6.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
 
