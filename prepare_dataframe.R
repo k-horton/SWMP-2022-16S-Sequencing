@@ -481,6 +481,7 @@ name_change$Family<-name_change$Orig_Family
 
 seq_data<-name_change[c(4:9)]
 seq_data<-rename(seq_data, "Genus"="New_Genus")
+seq_data<-unique(seq_data)
 
 merged_table <- merge(table_rename, name_change, by=c("Genus","Family"), all=TRUE) 
 #clean up table
