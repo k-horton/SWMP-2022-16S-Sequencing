@@ -7,10 +7,11 @@ library(tidyr)
 library(readxl)
 library(writexl)
 
-#### Create cyanobacteria abundance table by date and SWMP ####
+#### Read in genus data  ####
 dir<-getwd()
 
-genus_data<-read_excel(paste0(dir,"/genus_cyano_df.xlsx"))
+genus_data<-read_excel(paste0(dir,"/wq_genus_cyano_ASV_abundance.xlsx"))
+cyano_data<-read_excel(paste0(dir,"/wq_overall_cyano_ASV_abundance.xlsx"))
 
 genus_data$Date<-factor(genus_data$Date,
                      levels=c("June 23rd","July 20th","Aug 3rd",
@@ -18,31 +19,34 @@ genus_data$Date<-factor(genus_data$Date,
                      labels = c("June 23rd", "July 20th", "Aug 3rd",
                                 "Aug 23rd","Aug 31st",  "Sept 27th"))
 
-cyano_abund<-pivot_wider(genus_data[c(3,60:64)], 
-                   id_cols = c("Class", "Order","Family", "Genus"), 
+cyano_data$Date<-factor(cyano_data$Date,
+                        levels=c("June 23rd","July 20th","Aug 3rd",
+                                 "Aug 23rd", "Aug 31st",  "Sept 27th"),
+                        labels = c("June 23rd", "July 20th", "Aug 3rd",
+                                   "Aug 23rd","Aug 31st",  "Sept 27th"))
+#### Relative abundance tables for genus data ####
+
+genus_pivot<-pivot_wider(genus_data[c(2,4,13)], 
+                   id_cols = c("Genus"), 
                    names_from = "Date", names_sort = TRUE,
-                   values_from = "genus_abundance",
+                   values_from = "genus_prop_abund",
                    values_fn=mean)
 
 excel_output_path <- paste0(dir,"/stats/cyano_abund_DATE_16S_sequencing.xlsx")
-write_xlsx(cyano_abund, path = excel_output_path)
+write_xlsx(genus_pivot, path = excel_output_path)
 
 
-cyano_abund<-pivot_wider(genus_data[c(4,60:64)], 
-                         id_cols = c("Class", "Order","Family", "Genus"), 
+genus_pivot<-pivot_wider(genus_data[c(3,4,13)], 
+                         id_cols = c("Genus"), 
                          names_from = "IDL", names_sort = TRUE,
-                         values_from = "genus_abundance",
+                         values_from = "genus_prop_abund",
                          values_fn=mean)
 
 excel_output_path <- paste0(dir,"/stats/cyano_abund_SWMPID_16S_sequencing.xlsx")
-write_xlsx(cyano_abund, path = excel_output_path)
-
-
-#### Read in joined WQ and micro data dataframe####
-join_data<-read_excel(paste0(dir,"/total_cyano_df.xlsx"))
+write_xlsx(genus_pivot, path = excel_output_path)
 
 #### subset data ####
-dataset <- join_data[c(3:5,14,40,47:50,98:101)]
+dataset <-cyano_data[c(2:3,12,21,47,54:57,101:104)]
 # set date as a factor and order chronologically
 dataset$Date<-factor(dataset$Date,
                    levels=c("June 23rd","July 20th","Aug 3rd",
@@ -338,38 +342,6 @@ cyano_long$Cyano_cell_type<-factor(cyano_long$Cyano_cell_type ,
                         levels = c("Colonialcells_L","Unicellularcells_L",  "Filamentouscells_L"),
                         labels = c("Colonial","Unicellular",  "Filamentous"))
 
-#### ******IN PROGRESS ****Plots - Abundance by cell type across field days ####
-# Boxplot cyanobacterial cells across field days grouped by cell type
-cell_box<-ggplot(cyano_long, aes(x=factor(x=Date, levels=date_level),
-                         y=Cyano_cell_abund, fill=Cyano_cell_type)) + 
-  geom_boxplot() + 
-  scale_fill_manual(values=my_colours_celltype, name = "Cell Morphology")+
-  xlab("Field Day") +
-  ylab("Abundance of cyanobacteria cells / L") +
-  ggtitle("Cyanobacterial cell abundance by morphology")+
-  box_theme
-cell_box
-
-ggsave("celltype_abund_box.png",  plot = last_plot(), 
-       path = paste0(dir, "/Abundance_plots"),
-       width = 14, height = 8, units = "in")
-
-# zoom in
-cell_box+coord_cartesian(ylim=c(0, 5.0e+06))
-
-# convert to percentage and re-plot as a bar plot
-cyano_long$Per_abund<-cyano_long$Cyano_cell_abund*100 / cyano_long$Totalcells_L
-
-cell_box<-ggplot(cyano_long, aes(x=factor(x=Date, levels=date_level),
-                                 y=Per_abund, fill=Cyano_cell_type)) + 
-  geom_bar(stat="identity", position = "stack") + 
-  scale_fill_manual(values=my_colours_celltype, name = "Cell Morphology")+
-  xlab("Field Day") +
-  ylab("Abundance of cyanobacteria cells / L") +
-  ggtitle("Cyanobacterial cell abundance by morphology")+
-  bar_theme+scale_y_continuous(expand = c(0,0))
-cell_box
-
 #### T-test - Cell-type for FLOW ####
 # Initialize an empty list to store T-test results
 t.test_results_list <- list()
@@ -397,11 +369,8 @@ for (variable_name in numerical_cols) {
 
 final_t.test_df <- bind_rows(t.test_results_list)
 
-# drop observations for residuals
-final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Storm_Base",]
-
 excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_FLOW_t.test.xlsx")
-write_xlsx(final_t.test_df_2, path = excel_output_path)
+write_xlsx(final_t.test_df, path = excel_output_path)
 
 #### T-test - Cell-type for DREDGE ####
 # Initialize an empty list to store T-test results
@@ -430,11 +399,8 @@ for (variable_name in numerical_cols) {
 
 final_t.test_df <- bind_rows(t.test_results_list)
 
-# drop observations for residuals
-final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Dredge_Cat",]
-
 excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_DREDGE_t.test.xlsx")
-write_xlsx(final_t.test_df_2, path = excel_output_path)
+write_xlsx(final_t.test_df, path = excel_output_path)
 
 #### T-test - Cell-type for PRE_2003 ####
 # Initialize an empty list to store T-test results
@@ -463,8 +429,5 @@ for (variable_name in numerical_cols) {
 
 final_t.test_df <- bind_rows(t.test_results_list)
 
-# drop observations for residuals
-final_t.test_df_2<-final_t.test_df[final_t.test_df$Cat_Variable == "Pre_2003",]
-
 excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_2003_t.test.xlsx")
-write_xlsx(final_t.test_df_2, path = excel_output_path)
+write_xlsx(final_t.test_df, path = excel_output_path)
