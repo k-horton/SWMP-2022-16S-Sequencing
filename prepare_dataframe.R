@@ -360,23 +360,40 @@ wq_data$Pre_2003<-factor(wq_data$Pre_2003,
 
 
 #### Calculate abundance data ####
-all_bact<-clone(no_ctrl)
-all_bact$tax_table<-subset(all_bact$tax_table, Kingdom=="k__Bacteria")
 
 # There are a few things we need to extract here:
-#   1. Overall library size for each sample
+#   1. Overall bacteria library size and cyanobacteria library size for each sample
 #   2. Relative abundance of cyanobacteria as a whole out of entire library for each sample.
-#   3. Relative abundance of individual cyano taxa out of entire library for each sample
+#   3. Relative abundance of individual cyano taxa out of entire cyanobacteria library for each sample
 
 # 1. Overall library size for each sample
+# Bacteria library size
+all_bact<-clone(no_ctrl)
+all_bact$tax_table<-subset(all_bact$tax_table, Kingdom=="k__Bacteria")
+all_bact$tidy_dataset()
 
-# reads
-otu_table<-all_bact$otu_table
+bact_otu_table<-all_bact$otu_table
+bact_library_size<-colSums(bact_otu_table[c(1:69)])
+print(bact_library_size)
 
-library_size<-colSums(otu_table[c(1:69)])
-print(library_size)
-library_size<-as.data.frame(library_size)
-library_size<- data.frame(Sample = row.names(library_size), library_size, row.names=NULL)
+bact_library_size<-as.data.frame(bact_library_size)
+bact_library_size<- data.frame(Sample = row.names(bact_library_size), 
+                               bact_library_size, row.names=NULL)
+
+# Cyanobacteria library size
+all_cyano<-clone(no_ctrl)
+all_cyano$tax_table<-subset(all_cyano$tax_table, Class=="c__Cyanobacteriia")
+all_cyano$tidy_dataset()
+
+cyano_otu_table<-all_cyano$otu_table
+cyano_library_size<-colSums(cyano_otu_table[c(1:46)])
+print(cyano_library_size)
+
+cyano_library_size<-as.data.frame(cyano_library_size)
+cyano_library_size<- data.frame(Sample = row.names(cyano_library_size), 
+                                cyano_library_size, row.names=NULL)
+
+library_size<-left_join(bact_library_size, cyano_library_size, by="Sample")
 
 dir<-getwd()
 write_xlsx(library_size, path = paste0(dir,"/library_size.xlsx"))
@@ -384,19 +401,19 @@ write_xlsx(library_size, path = paste0(dir,"/library_size.xlsx"))
 #   2. Relative abundance of cyanobacteria as a whole out of entire library for each sample.
 
 # reads
-head(otu_table, 3)
+head(bact_library_size)
 # associated taxonomy
-tax_table<-all_bact$tax_table
+bact_tax_table<-all_bact$tax_table
 
 # Ensure the row names of otu_table match the row names of tax_table and re-order if necessary
-if (!all(rownames(otu_table) == rownames(tax_table))) {
+if (!all(rownames(bact_otu_table) == rownames(bact_tax_table))) {
   warning("Rownames of otu_table and tax_table do not match exactly.
           Reordering otu_table based on tax_table rownames.")
-  otu_table <- otu_table[rownames(tax_table), ]
+  bact_otu_table <- bact_otu_table[rownames(bact_tax_table), ]
 }
 
 # merge taxa and otu tables
-merged_table <- merge(tax_table, otu_table, by=0, all=TRUE) 
+merged_table <- merge(bact_tax_table, bact_otu_table, by=0, all=TRUE) 
 write_xlsx(merged_table, path = paste0(dir,"/all_Bacteria_ASV_abundance.xlsx"))
 
 # Define function to clean up the taxonomic prefixes
@@ -432,20 +449,18 @@ pivot<-pivot_longer(cyano_vs_bact_sample_reads, cols=c(2:70),
 pivot <- pivot %>% select(Sample, everything()) %>%pivot_wider(names_from="Genus", 
                                                                values_from="Reads")
 # merge table w/ the total library size for each sample
-cyano_abund <- merge(pivot, library_size, by=1, all=TRUE) 
+overall_cyano_abund <- merge(pivot, library_size, by=1, all=TRUE) 
 
 #   3. Relative abundance of individual cyano taxa out of entire library for each sample
 
-otu_table<-all_bact$otu_table
-tax_table<-all_bact$tax_table
+cyano_otu_table<-all_cyano$otu_table
+cyano_tax_table<-all_cyano$tax_table
 
 # merge taxa and otu tables
-merged_table <- merge(tax_table, otu_table, by=0, all=TRUE) 
-
-cyano_sub<-subset(merged_table, Class == "c__Cyanobacteriia")
+merged_table <- merge(cyano_tax_table, cyano_otu_table, by=0, all=TRUE) 
 
 # drop species, class, phylum, kingdom, and rownames columns
-table_rename<-cyano_sub[c(5:7,9:77)]
+table_rename<-merged_table[c(5:7,9:54)]
 print(unique(table_rename$Genus))
 #[1] "g__Leptolyngbya_ANT.L52.2"   "g__"                         "g__Cyanobium_PCC-6307"      
 #[4] "g__Phormidesmis_ANT.L52.6"   "g__RD011"                    "g__Synechocystis_PCC-6803"  
@@ -471,24 +486,24 @@ merged_table <- merge(table_rename, name_change, by=c("Genus","Family"), all=TRU
 #clean up table
 merged_table$Genus<-merged_table$New_Genus
 merged_table$Family<-merged_table$New_Family
-merged_table<-merged_table[c(1:2,4:72,77:81)]
+merged_table<-merged_table[c(1:2,4:49)]
 
-genus_sample_reads<-merged_table[c(1, 3:76)] %>% 
+genus_sample_reads<-merged_table[c(1, 3:48)] %>% 
   group_by(Genus) %>% 
-  summarise(across(c(1:69), sum))
+  summarise(across(c(1:46), sum))
 
-family_sample_reads<-merged_table[c(2:76)] %>% 
+family_sample_reads<-merged_table[c(2:48)] %>% 
   group_by(Family) %>% 
-  summarise(across(c(1:69), sum))
+  summarise(across(c(1:46), sum))
 
 genus_seq<- left_join(genus_sample_reads, seq_data, by="Genus")
 
 family_pivot<-family_sample_reads %>%
-  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance") 
+  pivot_longer(cols=c(2:47), names_to="Sample", values_to="Abundance") 
 family_pivot<-family_pivot[family_pivot$Abundance!=0,]
 
 genus_pivot<-genus_seq %>%
-  pivot_longer(cols=c(2:70), names_to="Sample", values_to="Abundance")
+  pivot_longer(cols=c(2:47), names_to="Sample", values_to="Abundance")
 #drop zeroes
 genus_pivot<-genus_pivot[genus_pivot$Abundance!=0,]
 
@@ -500,18 +515,18 @@ family_merge <- merge(family_pivot, library_size, by="Sample", all=TRUE)
 #       Relative Abundance(ASV1) = N(ASV1) / (N(ASV1)+N(ASV2)+...N(ASVn))
 
 # General cyanobacteria
-cyano_abund$Prop_abund_cyano<-cyano_abund$Cyanobacteria / cyano_abund$library_size
-cyano_abund$Prop_abund_bact<-cyano_abund$'Other Bacteria' / cyano_abund$library_size
+overall_cyano_abund$Prop_abund_cyano<-overall_cyano_abund$Cyanobacteria /overall_cyano_abund$bact_library_size
+overall_cyano_abund$Prop_abund_bact<-overall_cyano_abund$'Other Bacteria' / overall_cyano_abund$bact_library_size
 
 # Genus
-genus_merge$Prop_abund<-genus_merge$Abundance / genus_merge$library_size
+genus_merge$genus_prop_abund<-genus_merge$Abundance / genus_merge$cyano_library_size
 
 # Family
-family_merge$Prop_abund<-family_merge$Abundance / family_merge$library_size
+family_merge$family_prop_abund<-family_merge$Abundance / family_merge$cyano_library_size
 
 #### Check normality of abundance data ####
 # check normality
-wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
+wq_cyano_abund <- merge(overall_cyano_abund, wq_data, by="Sample", all=TRUE) 
 res_aov <- aov(Prop_abund_cyano ~ Date, data = wq_cyano_abund)
 par(mfrow = c(1, 2)) 
 # histogram
@@ -532,39 +547,39 @@ qqPlot(res_aov$residuals,   add.line = TRUE)
 #double check genus and family data
 wq_genus_merge <- merge(genus_merge, wq_data, by="Sample", all=TRUE) 
 wq_genus_drop<-wq_genus_merge[wq_genus_merge$Abundance!=0,]
-res_aov <- aov(Prop_abund ~ Date, data = wq_genus_drop)
+res_aov <- aov(genus_prop_abund ~ Date, data = wq_genus_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals, add.line = TRUE)
 
-res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_genus_drop)
+res_aov <- aov(log10(genus_prop_abund+0.01) ~ Date,  data = wq_genus_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 wq_family_merge <- merge(family_merge, wq_data, by="Sample", all=TRUE) 
 wq_family_drop<-wq_family_merge[wq_family_merge$Abundance!=0,]
-res_aov <- aov(Prop_abund ~ Date, data = wq_family_drop)
+res_aov <- aov(family_prop_abund ~ Date, data = wq_family_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals, add.line = TRUE)
 
-res_aov <- aov(log10(Prop_abund+0.01) ~ Date,  data = wq_family_drop)
+res_aov <- aov(log10(family_prop_abund+0.01) ~ Date,  data = wq_family_drop)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # Apply transformations
-family_merge$logAbund<-log10(family_merge$Prop_abund+0.01)
-genus_merge$logAbund<-log10(genus_merge$Prop_abund+0.01)
-cyano_abund$logAbund_cyano<-log10(cyano_abund$Prop_abund_cyano+0.01)
-cyano_abund$logAbund_bact<-log10(cyano_abund$Prop_abund_bact+0.01)
+family_merge$logP_Abund_family<-log10(family_merge$family_prop_abund+0.01)
+genus_merge$logP_Abund_genus<-log10(genus_merge$genus_prop_abund+0.01)
+overall_cyano_abund$logP_Abund_cyano<-log10(overall_cyano_abund$Prop_abund_cyano+0.01)
+overall_cyano_abund$logP_Abund_bact<-log10(overall_cyano_abund$Prop_abund_bact+0.01)
 
 #### Output dataframes ####
 # Merge WQ data with abundance data
 wq_genus_merge <- merge(genus_merge, wq_data, by="Sample", all=TRUE) 
 wq_family_merge <- merge(family_merge, wq_data, by="Sample", all=TRUE) 
-wq_cyano_abund <- merge(cyano_abund, wq_data, by="Sample", all=TRUE) 
+wq_cyano_abund <- merge(overall_cyano_abund, wq_data, by="Sample", all=TRUE) 
 
 # re-order data frames
 wq_genus_merge <- wq_genus_merge %>%
@@ -577,11 +592,11 @@ wq_cyano_abund<- wq_cyano_abund %>%
   select(Sample, Date, IDL, everything())
 
 # Abundance data only
-write_xlsx(cyano_abund, path = paste0(dir,"/cyano_ASV_abundance.xlsx"))
+write_xlsx(overall_cyano_abund, path = paste0(dir,"/overall_cyano_ASV_abundance.xlsx"))
 write_xlsx(genus_merge, path = paste0(dir,"/genus_cyano_ASV_abundance.xlsx"))
 write_xlsx(family_merge, path = paste0(dir,"/family_cyano_ASV_abundance.xlsx"))
 
 # Abundance + WQ data
-write_xlsx(wq_cyano_abund, path = paste0(dir,"/wq_cyano_ASV_abundance.xlsx"))
+write_xlsx(wq_cyano_abund, path = paste0(dir,"/wq_overall_cyano_ASV_abundance.xlsx"))
 write_xlsx(wq_genus_merge, path = paste0(dir,"/wq_genus_cyano_ASV_abundance.xlsx"))
 write_xlsx(wq_family_merge, path = paste0(dir,"/wq_family_cyano_ASV_abundance.xlsx"))

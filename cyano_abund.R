@@ -9,7 +9,7 @@ library(ggplot2)
 dir<-getwd()
 genus_data<-read_excel(paste0(dir,"/wq_genus_cyano_ASV_abundance.xlsx"))
 family_data<-read_excel(paste0(dir,"/wq_family_cyano_ASV_abundance.xlsx"))
-cyano_data<-read_excel(paste0(dir,"/wq_cyano_ASV_abundance.xlsx"))
+cyano_data<-read_excel(paste0(dir,"/wq_overall_cyano_ASV_abundance.xlsx"))
 
 #### Plot abundance of Cyanobacteria vs all bacteria ####
 # set colours for each group
@@ -21,7 +21,7 @@ date<-c("June 23rd", "July 20th","Aug 3rd",
         "Aug 23rd", "Aug 31st","Sept 27th")
 
 # pivot data
-cyano_pivot<-pivot_longer(cyano_data, cols=c(7,8), 
+cyano_pivot<-pivot_longer(cyano_data, cols=c(8,9), 
                           names_to = "Group",
                           values_to="Abundance")
 
@@ -59,16 +59,17 @@ ggsave("zoom_all_bact_abund_bar.png",  plot = last_plot(),
        path = paste0(dir, "/Abundance_plots"),
        width = 14, height = 8, units = "in")
 
+
 #### Summ. Stats - Cyano abund. for DATE and SWMP ID ####
 # Subset to variables of interest 
-dataset<-cyano_data[c(2:8,11,20,46:48,56,97,98,103)]
+dataset<-cyano_data[c(2:9,12,21,47:49,57,98,99,104)]
 
 # DATE
 summary_stats_list <- list()
 
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "Date"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "Date"]
 
 dataset$Date <- as.factor(dataset$Date)
 
@@ -97,8 +98,8 @@ write_xlsx(final_summ_stats, path = excel_output_path)
 summary_stats_list <- list()
 
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "IDL"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "IDL"]
 
 dataset$Date <- as.factor(dataset$Date)
 
@@ -128,8 +129,8 @@ anova_results_list <- list()
 # re-name Other Bacteria column
 dataset<-rename(dataset, Other_Bacteria = `Other Bacteria`)
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "Date"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "Date"]
 
 dataset$Date <- as.factor(dataset$Date)
 # set Date label order
@@ -163,7 +164,6 @@ final_anova_df$Cat_Variable<-factor(final_anova_df$Cat_Variable,
 # drop observations for residuals
 final_anova_df_2<-final_anova_df[final_anova_df$Cat_Variable == "Date",]
 
-
 excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_DATE_anova.xlsx")
 write_xlsx(final_anova_df_2, path = excel_output_path)
 
@@ -172,8 +172,8 @@ write_xlsx(final_anova_df_2, path = excel_output_path)
 t.test_results_list <- list()
 
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "Storm_Base"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "Storm_Base"]
 
 # Loop through each numerical variable
 for (variable_name in numerical_cols) {
@@ -202,8 +202,8 @@ write_xlsx(final_t.test_df, path = excel_output_path)
 t.test_results_list <- list()
 
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "Dredge_Cat"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "Dredge_Cat"]
 
 # Loop through each numerical variable
 for (variable_name in numerical_cols) {
@@ -234,8 +234,8 @@ write_xlsx(final_t.test_df, path = excel_output_path)
 t.test_results_list <- list()
 
 # Get the names of the numerical variables you want to test
-numerical_cols <- names(dataset[c(3:7,11:16)])[
-  !names(dataset[c(3:7,11:16)]) %in% "Pre_2003"]
+numerical_cols <- names(dataset[c(3:8,12:17)])[
+  !names(dataset[c(3:8,12:17)]) %in% "Pre_2003"]
 
 # Loop through each numerical variable
 for (variable_name in numerical_cols) {
@@ -283,7 +283,7 @@ date_level<-c("June 23rd","July 20th","Aug 3rd",
 my_colours_storm<-c("Stormflow"= "steelblue4",
                     "Low Flow" = "slategray1")
 #### Plot - Abundance from 16S sequencing #####
-dataset<-cyano_data[c(2:4,7:11,20,46:48,56,97:98,103)]
+dataset<-cyano_data[c(2:5,8:12,21,47:49,57,98:99,104)]
 
 cyano_box<-ggplot(dataset, aes(x=factor(x=Date, levels=date_level),
                                y=Prop_abund_cyano*100)) + 
@@ -308,7 +308,7 @@ cyano_box
   
   # generate p-values for labels
   t.test.label<-dataset %>%
-    pairwise_t_test(logAbund_cyano~Date, p.adjust.method = "holm") 
+    pairwise_t_test(logP_Abund_cyano~Date, p.adjust.method = "holm") 
   head(t.test.label,5)
   
   # add matching grouping columns to min_max dataframe
