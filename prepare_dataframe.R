@@ -8,6 +8,7 @@ library(readxl)
 library(tidyr)
 library(dplyr)
 library(EnvStats)
+library(rstatix)
 
 #### Prepare Microtable ####
 # First, load sequence data and remove contaminant samples as determined previously 
@@ -216,7 +217,7 @@ hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
 # try log transformation
-res_aov <- aov(log10(copies_16S_L+0.01) ~ Date,  data = wq_data)
+res_aov <- aov(log10(copies_16S_L+0.1) ~ Date,  data = wq_data)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -231,7 +232,7 @@ par(mfrow = c(1, 2))
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
 
-res_aov <- aov(log10(copies_16S_L+0.01) ~ Date, data = wq_data_sub)
+res_aov <- aov(log10(copies_16S_L+0.1) ~ Date, data = wq_data_sub)
 par(mfrow = c(1, 2)) 
 hist(res_aov$residuals)
 qqPlot(res_aov$residuals,   add.line = TRUE)
@@ -320,7 +321,6 @@ wq_data$LogNO2<-log10(wq_data$Nitrite_mgL + 0.001)
 wq_data$LogON<-log10(wq_data$Organic_N_mgL + 0.1)
 wq_data$LogTN<-log10(wq_data$Total_N_mgL + 0.01)
 wq_data$LogDIN<-log10(wq_data$DIN + 0.001)
-wq_data$LogChla<-log10(wq_data$Chla_gL + 0.001)
 wq_data$LogNH3<-log10(wq_data$NH3_mgL + 0.0001)
 wq_data$LogNH4<-log10(wq_data$NH4_mgL + 0.01)
 wq_data$LogNO3_TN<-log10(wq_data$NO3_TN + 0.001)
@@ -332,7 +332,7 @@ wq_data$LogTN_TP<-log10(wq_data$TN_TP + 0.1)
 
 wq_data$logChla<-log10(wq_data$Chla_gL+0.01)
 
-wq_data$log16S<-log10(wq_data$copies_16S_L+0.01)
+wq_data$log16S<-log10(wq_data$copies_16S_L+0.1)
 wq_data$logmcyE<-log10(wq_data$copies_mcyE_L+0.01)
 wq_data$logU_cyano<-log10(wq_data$Unicellularcells_L+0.01)
 wq_data$logC_cyano<-log10(wq_data$Colonialcells_L+0.01)
@@ -340,6 +340,8 @@ wq_data$logF_cyano<-log10(wq_data$Filamentouscells_L+0.01)
 wq_data$logT_cyano<-log10(wq_data$Totalcells_L+0.01)
 wq_data$logmcyE_16S<-log10(wq_data$mcyE_16S_ratio+0.01)
 wq_data$logHet<-log10(wq_data$Total_Het_L+0.01)
+
+wq_data$logCond<-log10(wq_data$Cond_uScm+0.01)
 
 #### Assign labels to categorical variables ####
 wq_data$Storm_Base<-factor(wq_data$Storm_Base ,
@@ -601,3 +603,64 @@ write_xlsx(family_merge, path = paste0(dir,"/family_cyano_ASV_abundance.xlsx"))
 write_xlsx(wq_cyano_abund, path = paste0(dir,"/wq_overall_cyano_ASV_abundance.xlsx"))
 write_xlsx(wq_genus_merge, path = paste0(dir,"/wq_genus_cyano_ASV_abundance.xlsx"))
 write_xlsx(wq_family_merge, path = paste0(dir,"/wq_family_cyano_ASV_abundance.xlsx"))
+
+
+#### Genus mean abundance across field days and swmp ####
+# DATE
+# Subset to variables of interest 
+dataset<-wq_genus_merge[c(2,4,13)]
+
+check_data<-wq_genus_merge[c(1,2,13)]
+check_data[is.na(check_data)] <- 0
+check_data <- aggregate(genus_prop_abund ~ Sample, data = check_data, FUN = sum)
+# Make sure all samples add up to 1 or 0
+
+dataset_drop<-drop_na(dataset, Genus)
+dataset_drop<-drop_na(dataset, Genus)
+dataset2<-dataset_drop
+dataset2<-dataset2 %>% 
+  group_by(Date, Genus) %>%
+  get_summary_stats(genus_prop_abund, type = "mean_sd")
+
+excel_output_path <- paste0(dir,"/stats/genus_abund_table_DATE.xlsx")
+write_xlsx(dataset2, path = excel_output_path)
+
+# SWMP ID
+# Subset to variables of interest 
+dataset<-wq_genus_merge[c(3,4,13)]
+
+dataset2<-dataset_drop
+dataset2<- dataset2 %>% 
+  group_by(IDL, Genus) %>%
+  get_summary_stats(genus_prop_abund, type = "mean_sd")
+
+excel_output_path <- paste0(dir,"/stats/genus_abund_table_ID.xlsx")
+write_xlsx(dataset2, path = excel_output_path)
+#### Family mean abundance across field days and swmp ####
+# DATE
+# Subset to variables of interest 
+dataset<-wq_family_merge[c(2:4,8)]
+
+check_data<-wq_family_merge[c(1,4,8)]
+check_data[is.na(check_data)] <- 0
+check_data <- aggregate(family_prop_abund ~ Sample, data = check_data, FUN = sum)
+# Make sure all samples add up to 1 or 0
+
+dataset_drop<-drop_na(dataset, Family)
+dataset2<-dataset_drop
+dataset2<-dataset2 %>% 
+  group_by(Date, Family) %>%
+  get_summary_stats(family_prop_abund, type = "mean_sd")
+
+excel_output_path <- paste0(dir,"/stats/family_abund_table_DATE.xlsx")
+write_xlsx(dataset2, path = excel_output_path)
+
+# SWMP ID
+# Subset to variables of interest 
+dataset2<-dataset_drop
+dataset2<- dataset2 %>% 
+  group_by(IDL, Family) %>%
+  get_summary_stats(family_prop_abund, type = "mean_sd")
+
+excel_output_path <- paste0(dir,"/stats/family_abund_table_ID.xlsx")
+write_xlsx(dataset2, path = excel_output_path)

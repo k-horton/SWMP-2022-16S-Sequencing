@@ -2,8 +2,10 @@ library(dplyr)
 library(rstatix)
 library(ggplot2)
 library(ggpubr)
+library(readxl)
 library(writexl)
 library(ggplot2)
+library(tidyr)
 
 #### Read in data ####
 dir<-getwd()
@@ -62,7 +64,7 @@ ggsave("zoom_all_bact_abund_bar.png",  plot = last_plot(),
 
 #### Summ. Stats - Cyano abund. for DATE and SWMP ID ####
 # Subset to variables of interest 
-dataset<-cyano_data[c(2:9,12,21,47:49,57,98,99,104)]
+dataset<-cyano_data[c(2:9,12,21,47:49,57,97,98,103)]
 
 # DATE
 summary_stats_list <- list()
@@ -259,6 +261,68 @@ final_t.test_df <- bind_rows(t.test_results_list)
 excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_2003_t.test.xlsx")
 write_xlsx(final_t.test_df, path = excel_output_path)
 
+#### Pearson - Cyano abund. x Cyano abund ####
+# Subset to variables of interest 
+dataset<-cyano_data[c(1,2,3,6:11,48,49,57,97:98,103)]
+
+# subset to variables being tested
+abund_cols <- colnames(dataset)[c(4:15)]
+abund_cols <- abund_cols[!abund_cols %in% "Sample"]
+
+pearson_results_list <- list()
+
+pearson <- cor_test(abund_cols,abund_cols, data=dataset, method="pearson",
+                    alternative="two.sided")
+pearson<-as.data.frame(pearson)
+
+
+pearson_pivot_cor<-pivot_wider(pearson[c(1:3)], names_from=var2, values_from = cor )
+
+pearson_pivot_p<-pivot_wider(pearson[c(1:2,5)], names_from=var2, values_from = p )
+
+pearson_results_list <- list()
+pearson_results_list[["correlation"]] <- pearson_pivot_cor
+pearson_results_list[["p_value"]] <- pearson_pivot_p
+
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_int_PEARSON.xlsx")
+write_xlsx(pearson_results_list, path = excel_output_path)
+
+
+
+#### Pearson - Cyano abund. for all WQ ####
+# Subset to variables of interest 
+dataset<-cyano_data[c(1,2,3,7:12,22:38,47:49,57,62:98,103)]
+
+# Get the names of the abundance and WQ variables being tested
+abund_cols <- colnames(dataset)[c(4:8,28:30,66:68)]
+abund_cols <- abund_cols[!abund_cols %in% "Sample"]
+
+wq_cols <- colnames(dataset)[c(10:26,31:56,57,58:65)]
+wq_cols <- wq_cols[!wq_cols %in% "Sample"]
+
+pearson_results_list <- list()
+
+for (abund_variable in abund_cols) {
+  pearson_table <- data.frame(
+    wq_variable=numeric(),
+    cor=numeric(),
+    p=numeric()
+  )
+  for (wq_variable in wq_cols) {
+    # Perform Pearson correlation
+    pearson <- cor_test(abund_variable,wq_variable, data=dataset, method="pearson",
+                        alternative="two.sided")
+    pearson<-as.data.frame(pearson)
+    pearson_table[nrow(pearson_table) + 1,] <- list(pearson$var2, pearson$cor, pearson$p)    
+    pearson_results_list[[abund_variable]] <- pearson_table
+  }
+}
+
+
+excel_output_path <- paste0(dir,"/stats/overall_cyano_stats/o_cyano_PEARSON.xlsx")
+write_xlsx(pearson_results_list, path = excel_output_path)
+
+  
 #### Define aesthetics for plots #####
 # Define theme for boxplot
 box_theme <- theme(strip.background = element_rect(fill="white", color="black"),
