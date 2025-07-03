@@ -200,6 +200,40 @@ final_anova_df_2<-final_anova_df[final_anova_df$Cat_Variable == "Date",]
 excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_DATE_anova.xlsx")
 write_xlsx(final_anova_df_2, path = excel_output_path)
 
+#### Pearson - Cyano abund. for all WQ ####
+# Subset to variables of interest 
+dataset<-cyano_data[c(1,2,3,7:11,22:38,48:49,54:57,62:98,100:103,12,21,47)]
+
+# Get the names of the abundance and WQ variables being tested
+abund_cols <- colnames(dataset)[c(28:31,69:72)]
+abund_cols <- abund_cols[!abund_cols %in% "Sample"]
+
+wq_cols <- colnames(dataset)[c(4:27,32:68)]
+wq_cols <- wq_cols[!wq_cols %in% "Sample"]
+
+pearson_results_list <- list()
+
+for (abund_variable in abund_cols) {
+  pearson_table <- data.frame(
+    wq_variable=numeric(),
+    cor=numeric(),
+    p=numeric()
+  )
+  for (wq_variable in wq_cols) {
+    # Perform Pearson correlation
+    pearson <- cor_test(abund_variable,wq_variable, data=dataset, method="pearson",
+                        alternative="two.sided")
+    pearson<-as.data.frame(pearson)
+    pearson_table[nrow(pearson_table) + 1,] <- list(pearson$var2, pearson$cor, pearson$p)    
+    pearson_results_list[[abund_variable]] <- pearson_table
+  }
+}
+
+
+excel_output_path <- paste0(dir,"/stats/m_community_stats/m_community_PEARSON.xlsx")
+write_xlsx(pearson_results_list, path = excel_output_path)
+
+
 #### Plots - Filamentous cells #####
 # Boxplot total filamentous cyanobacterial cells across field days
 filam_box<-ggplot(dataset, aes(x=Date,
