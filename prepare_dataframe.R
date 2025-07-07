@@ -1,6 +1,5 @@
 ### Prepare dataframes
 library(decontam)
-library(file2meco)
 library(microeco)
 library(phyloseq)
 library(writexl)
@@ -9,6 +8,7 @@ library(tidyr)
 library(dplyr)
 library(EnvStats)
 library(rstatix)
+library(file2meco)
 
 #### Prepare Microtable ####
 # First, load sequence data and remove contaminant samples as determined previously 

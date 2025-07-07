@@ -1,10 +1,10 @@
 # Assess cyanobacterial community - specific taxa
 library(dplyr)
-library(rstatix)
-library(ggplot2)
 library(EnvStats)
-library(tidyr)
+library(ggplot2)
 library(readxl)
+library(rstatix)
+library(tidyr)
 library(writexl)
 
 #### Read in genus data  ####

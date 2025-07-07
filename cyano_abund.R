@@ -1,11 +1,10 @@
 library(dplyr)
-library(rstatix)
 library(ggplot2)
 library(ggpubr)
 library(readxl)
-library(writexl)
-library(ggplot2)
+library(rstatix)
 library(tidyr)
+library(writexl)
 
 #### Read in data ####
 dir<-getwd()

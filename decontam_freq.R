@@ -1,14 +1,11 @@
 #### Decontam Frequency ####
 library(decontam)
-library(phyloseq)
 library(file2meco)
 library(microeco)
-library(ggplot2)
+library(phyloseq)
 
 #create microtable as before
-# Assign current working directory to 'dir'
-dir<-getwd()
-
+{dir<-getwd()
 # Define the path to each of the files needed to create the microtable object. Replace [Path to file] with the actual path
 abund_file_path <- paste0(dir, "/merge_concat.seqs_count_table.qza")
 sample_file_path <- paste0(dir, "/metadata_decontam.xlsx")
@@ -19,7 +16,7 @@ rep_data <- paste0(dir, "/merge_concat.representative_seqs.qza")
 
 tcontam <- qiime2meco(abund_file_path, sample_table = sample_file_path, 
                       taxonomy_table = taxonomy_file_path, phylo_tree = tree_data, 
-                      rep_fasta = rep_data, auto_tidy = TRUE)
+                      rep_fasta = rep_data, auto_tidy = TRUE)}
 
 # For frequency based analysis of contamaninants, no controls are used.
 # Drop the positive and negative control samples from the microtable. 

@@ -2,15 +2,14 @@
 # Prevalence-based contaminant identification is preferred for low biomass environments, 
 # and relies on the use of a negative control sample.
 
-library(phyloseq)
-library(file2meco)
-library(microeco)
 library(decontam)
+library(file2meco)
 library(ggplot2)
+library(microeco)
+library(phyloseq)
 
 #create microtable as before
-# Assign current working directory to 'dir'
-dir<-getwd()
+{dir<-getwd()
 
 # Define the path to each of the files needed to create the microtable object. Replace [Path to file] with the actual path
 abund_file_path <- paste0(dir, "/merge_concat.seqs_count_table.qza")
@@ -22,6 +21,7 @@ tcontam <- qiime2meco(abund_file_path, sample_table = sample_file_path,
                       taxonomy_table = taxonomy_file_path, phylo_tree = tree_data, 
                       rep_fasta = rep_data, auto_tidy = TRUE)
 # 2 samples with 0 abundance are removed from the otu_table ...
+}
 
 # First drop the positive control sample from the microtable
 table2<-clone(tcontam)
@@ -34,12 +34,6 @@ table2$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 # convert microtable to phyloseq object
 physeq <- meco2phyloseq(table2)
 physeq
-# phyloseq-class experiment-level object
-# otu_table()   OTU Table:         [ 8660 taxa and 70 samples ]
-# sample_data() Sample Data:       [ 70 samples by 45 sample variables ]
-# tax_table()   Taxonomy Table:    [ 8660 taxa by 7 taxonomic ranks ]
-# phy_tree()    Phylogenetic Tree: [ 8660 tips and 8601 internal nodes ]
-# refseq()      DNAStringSet:      [ 8660 reference sequences ]
 
 # In the phyloseq object, "Sample_or_Control" is the sample variable that holds the 
 # negative control information. 
