@@ -37,23 +37,9 @@ Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each 
 |Aug 31st  |0.8811     |8.6e-05    |0.0027    |0.1584     |-        |  
 |Sept 27th |0.4616     |3.8e-05    |0.0012    |0.0769     |1.0000 |
 
-Figure 2: Total cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
-![t_cyano_abund_box](https://github.com/user-attachments/assets/ce02a93b-49a2-40aa-9221-41a2f24fd46f)
-
-
 6. Abundance of each cyanobacteria morphology observed with microscopy were compared across field days.
 
     *(File: community_composition.R)*
-
-Figure 3: Total unicellular cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
-![uni_abund_box](https://github.com/user-attachments/assets/b9560ccd-64a6-4a6b-b0ec-913f13cc1c82)
-
-Figure 4: Total colony-forming cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
-![colony_abund_box](https://github.com/user-attachments/assets/7455557c-8b8d-4c48-a622-8872446a26f7)
-
-Figure 5: Total filamentous cyanobacterial cells observed over time in stormwater management pond (SWMP) water samples with microscopy.
-![filam_abund_box](https://github.com/user-attachments/assets/b24b53cf-c8ae-4f7b-88a3-8c3658e15048)
-
 
 7. Identify nitrogen fixers and relationship with nitrogen conditions.
 
@@ -63,12 +49,7 @@ Figure 5: Total filamentous cyanobacterial cells observed over time in stormwate
  
     *(File: mcyE_producers.R)*
 
-
-Figure X: Concentration of chloride (mg/L) at SWMP pond sites across field days (see repository SWMP-2022-Water-Quality for full water quality analysis. 
-![pond_chloride_box](https://github.com/user-attachments/assets/04efc1d2-faf2-43ae-9a43-bd93fadb40b0)
-
-
-11. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
+10. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
 
      *(File: method_comparison.R)*
 
