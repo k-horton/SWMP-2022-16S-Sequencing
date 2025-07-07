@@ -49,11 +49,12 @@ Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each 
  
     *(File: mcyE_producers.R)*
 
-10. Compare molecular methods (qPCR and sequencing) to traditional method (microscopy) used in the study.
+10. Assess n-limitation indicators and toxin indicators for correlations.
 
      *(File: method_comparison.R)*
 
 ##### Citations
+
 Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
 
 Liu, C., Cui, Y., Li, X., Yao, M. microeco: an R package for data mining
