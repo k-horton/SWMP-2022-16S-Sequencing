@@ -52,6 +52,8 @@ Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from
     *(File: assign_taxonomy.sh)*
 
 ##### Citations
+Callahan, B. J., P. J. McMurdie, M. J. Rosen, A. W. Han, A. J. A. Johnson, and S. P. Holmes. 2016. DADA2: High-resolution sample inference from Illumina amplicon data. Nature Methods 13:581–583.
+
 Dacey, D. P., and F. J. J. Chain. 2021. Concatenation of paired-end reads improves taxonomic classification of amplicons for profiling microbial communities. BMC Bioinformatics 22.
 
 Guerrini, C. J., J. R. Botkin, and A. L. McGuire. 2019. Reproducible, interactive, scalable and extensible microbiome data science using QIIME 2. Nature Biotechnology 37:852–857.
