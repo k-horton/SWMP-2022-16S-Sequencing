@@ -1,17 +1,34 @@
 ## Analysis of 16S Sequences in R using microeco
 
-After processing sequences with QIIME 2, data analysis was completed with the R package microeco (Liu, C. et al. 2021). Note that water quality data has already been analyzed (see repository SWMP-2022-Water-Quality), and will be used to understand the context of the microbial community observed here.
+After processing sequences with QIIME 2, data analysis was completed with the R package microeco (Liu, C. et al. 2021). Note that water quality data has already been analyzed (see repository SWMP-2022-Water-Quality), and will be used to understand the context of the microbial community observed.
+
+The following R (R Core Team, 2024) packages were used for this data analysis and producing figures:
+- decontam (Lazarevic et al. 2016)
+- dplyr (Wickham et al. 2023a)
+- EnvStats (Millard 2013)
+- file2meco (Liu et al. 2022a)
+- ggplot2 (Wickham 2016a)
+- ggpubr (Kassambara 2016)
+- gridExtra (Auguie 2010)
+- microeco (Liu et al. 2021a)
+- phyloseq (McMurdie and Holmes 2013a)
+- writexl (Ooms 2017)
+- readxl (Wickham and Bryan 2015)
+- rstatix (Kassambara 2019)
+- stringr (Wickham 2009)
+- tidyr (Wickham et al. 2024a)
+- vegan (Oksanen et al. 2025)
 
 ### Steps:
-1. QIIME 2 processed sequences were loaded into R and combined with sample metadata to create a 'microtable' object using functions from the file2meco R package (Liu, C. et al. 2022). Mitochondrial and chloroplast sequences were filtered out.
+1. QIIME 2 processed sequences were loaded into R and combined with sample metadata to create a 'microtable' object using functions from the file2meco R package. Mitochondrial and chloroplast sequences were filtered out.
 
      *(File: create_microtable.R)*
 
-2. Assess the sequencing error rate with the microeco package (Liu, C. et al. 2022) using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024). The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
+2. Assess the sequencing error rate with the microeco package using the sequenced positive control sample, ZymoBIOMICS Microbial Community DNA Standard (Zymo Research, 2024). The sequencing error rate was determined to be +/- 1.20%, which is within the manufacturers stated error rate (< 15%).
 
    *(File: sequencing_error_rate.R)*
 
-3. Assess the negative control for potential false positive hits using the packages microeco, dplyr, and tidyr (Liu et al. 2021, Wickham et al. 2023, 2024). Note that the negative control sample is not a 'true' negative control, as it was not subjected to DNA extraction. The negative control was supplied by the sequencing laboratory. Several taxa were detected in the negative control sample. Further evaluation of the potential contaminants is required. 
+3. The negative control was assessed for potential false positive hits. Note that the negative control sample is not a 'true' negative control, as it was not subjected to DNA extraction. The negative control was supplied by the sequencing laboratory. Several taxa were detected in the negative control sample. Further evaluation of the potential contaminants is required. 
 
    *(File: negative_control_sample.R)*
 
@@ -21,7 +38,7 @@ After processing sequences with QIIME 2, data analysis was completed with the R 
 
    Now that the dataframe has been cleaned up, use the file "prepare_dataframe.R" to quickly prepare microtable and WQ data for analyses. The abundance data was normalized by dividing the observed number of reads for the taxon of interest by the total number of observed reads in the library (sample). 
 
-6.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. The file2meco, microeco, ggplot2, dplyr, and phyloseq packages were used (Liu et al. 2022, 2021, Wickham et al. 2016, 2023, McMurdie and Holmes 2013). 
+6.  The abundance of cyanobacteria detected with microscopy, qPCR, and 16S sequencing were assessed across field days. 
 
     *(File: cyano_abund.R)*
 
@@ -41,21 +58,28 @@ Table 1: p-values for paired-sample t-test of cyanobacterial abundance for each 
 
     *(File: community_composition.R)*
 
-7. Identify nitrogen fixers and relationship with nitrogen conditions.
+7. Potential nitrogen fixers were identified based on 16S sequencing data and the presence of heterocysts observed in the sample. Abundance and presence of potential nitrogen fixers was compared with WQ variables (T-test, Pearson correlation) and across dates (ANOVA) to identify trends. 
 
-    *(File: nitrogen_fixation.R)*
+    *(File: nitrogen_limitation.R)*
 
-9. Identify potential microcystin producers and relationship with environmental variables.
+9. Potential microcystin (MC) producers were identified based on 16S sequencing data and data from a qPCR targeting the microcystin synthetase E coding region (*mcyE*). Abundance and presence of potential MC-producers was compared with WQ variables (T-test, Pearson correlation) and across dates (ANOVA) to identify trends. Other toxin producers were also identified using the 16S sequencing data.
  
-    *(File: mcyE_producers.R)*
+    *(File: mcyE_presence.R)*
 
-10. Assess n-limitation indicators and toxin indicators for correlations.
+10. The abundance of potential toxin producers and potential n-fixers were compared to determine if there is a link between nitrogen limitation and the proliferation of toxic cyanobacteria in stormwater management ponds. 
 
-     *(File: method_comparison.R)*
+     *(File: n_lim_mcyE_relationships.R)*
 
 ##### Citations
+Auguie, B. 2010, June 20. gridExtra: Miscellaneous Functions for “Grid” Graphics.
 
 Davis, N. M., Di. M. Proctor, S. P. Holmes, D. A. Relman, and B. J. Callahan. 2018. Simple statistical identification and removal of contaminant sequences in marker-gene and metagenomics data. Microbiome 6.
+
+Kassambara, A. 2016, July 20. ggpubr: “ggplot2” Based Publication Ready Plots.
+
+Kassambara, A. 2019, May 27. rstatix: Pipe-Friendly Framework for Basic Statistical Tests.
+
+Lazarevic, V., N. Gaïa, M. Girard, and J. Schrenzel. 2016. Decontamination of 16S rRNA gene amplicon sequence datasets based on bacterial load assessment by qPCR. BMC Microbiology 16.
 
 Liu, C., Cui, Y., Li, X., Yao, M. microeco: an R package for data mining
   in microbial community ecology. FEMS Microbiology Ecology, 2021, Volume 97, Issue 2,
@@ -66,6 +90,15 @@ Liu, C., Li, X., Mansoldo, F.R.P., An, J., Kou, Y., Zhang, X., Wang, J., Zeng, J
   co-occurrence patterns and functional profiles in wetland soils. Geoderma, 2022. 418, 115866.
 
 McMurdie, P. J., and S. Holmes. 2013. Phyloseq: An R Package for Reproducible Interactive Analysis and Graphics of Microbiome Census Data. PLoS ONE 8.
+
+Millard, S. P. 2013. An R Package for Environmental Statistics. Page R Documentation. Springer, Seattle, Washington.
+
+Oksanen, J., G. L. Simpson, F. G. Blanchet, R. Kindt, P. Legendre, P. R. Minchin, R. B. O’Hara, P. Solymos, M. H. H. Stevens, E. Szoecs, H. Wagner, M. Barbour, M. Bedward, B. Bolker, D. Borcard, T. Borman, G. Carvalho, M. Chirico, M. De Caceres, S. Durand, H. B. A. Evangelista, R. FitzJohn, M. Friendly, B. Furneaux, G. Hannigan, M. O. Hill, L. Lahti, C. Martino, D. McGlinn, M.-H. Ouellette, E. Ribeiro Cunha, T. Smith, A. Stier, C. J. F. Ter Braak, and J. Weedon. 2025. vegan: Community Ecology Package.
+Ooms, J. 2017, August 30. writexl: Export Data Frames to Excel “xlsx” Format.
+
+R Core Team. 2024. R: A Language and Environment for Statistical Computing. Vienna, Austria.
+
+Wickham, H. 2009, November 9. stringr: Simple, Consistent Wrappers for Common String Operations.
 
 Wickham, H. 2016. ggplot2: Elegant Graphics for Data Analysis Second Edition. Page (R. Gentleman, K. Hornik, and G. Parmigiani, Eds.). 2nd edition. Springer, Houston, TX
 
