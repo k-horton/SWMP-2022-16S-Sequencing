@@ -53,3 +53,10 @@ Sequencing data was processed and analyzed using a QIIME 2 pipeline adapted from
 
 ##### Citations
 Dacey, D. P., and F. J. J. Chain. 2021. Concatenation of paired-end reads improves taxonomic classification of amplicons for profiling microbial communities. BMC Bioinformatics 22.
+
+Guerrini, C. J., J. R. Botkin, and A. L. McGuire. 2019. Reproducible, interactive, scalable and extensible microbiome data science using QIIME 2. Nature Biotechnology 37:852–857.
+
+Martin, M. 2010. Cutadapt removes adapter sequences from high-throughput sequencing reads. EMBnet.journal 17.
+
+Masella, A. P., A. K. Bartram, J. M. Truszkowski, D. G. Brown, and J. D. Neufeld. 2012. PANDAseq: Paired-end assembler for illumina sequences. BMC Bioinformatics 13.
+
