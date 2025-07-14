@@ -35,7 +35,7 @@ Sequencing data was processed and analyzed using a QIIME 2 (Boylen, E. et al, 20
 
      *(Files: manifest_filecreate_length_trim.sh, manifest_file_length_trim.sh,  multi_job_manifest_length_trim.sh)*
     
-5. Sequences that could be merged (overlap with R1 and R2 reads) were merged with PANDAseq (Masella, A. P. et al, 2012), and any unmerged reads (no overlap) were subsequently concatenated with PANDAseq.
+5. Sequences that could be merged (overlap with R1 and R2 reads > 20 bases) were merged with PANDAseq (Masella, A. P. et al, 2012), and unmerged reads (overlap < 20) were subsequently concatenated with PANDAseq where possible.
 
    *(Files: merge_concat.sh, multi_job_merge_coincat.sh)*
 
