@@ -1,7 +1,7 @@
 #!/bin/bash
-dos2unix length_trim.sh
-
 cd [Working Directory]
+
+dos2unix length_trim.sh
 
 #   Shell script to run   F-barcode  R-barcode    F-file name             R-file name
 source ./length_trim.sh  CCTGAATCGC  GCCTTCGTAG  F1_SWMP1_S1_L001_R1_001  F1_SWMP1_S1_L001_R2_001  257
