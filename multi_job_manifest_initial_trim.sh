@@ -1,11 +1,10 @@
 #!/bin/bash
-
-dos2unix manifest_filecreate_initial_trim.sh
-dos2unix manifest_file_initial_trim.sh
-
 cd [Working Directory]
 
-# create file
+dos2unix ./manifest_filecreate_initial_trim.sh
+dos2unix ./manifest_file_initial_trim.sh
+
+# create manifest file
 source ./manifest_filecreate_initial_trim.sh	
 # populate file with the location of our sequences
 source ./manifest_file_initial_trim.sh F1_1	F1_SWMP1_S1
