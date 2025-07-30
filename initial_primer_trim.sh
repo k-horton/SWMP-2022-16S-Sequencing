@@ -1,7 +1,8 @@
 #!/bin/bash
 # Set the working directory 
 cd [Working Directory]
-conda init
+
+source ./conda.sh
 
 # Load the cutadapt module
 conda activate cutadapt
