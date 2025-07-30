@@ -2,6 +2,8 @@
 # Set the working directory 
 cd [Working Directory]
 
+source ./conda.sh
+
 conda activate qiime2-amplicon-2024.5
 # Sequences are in Casava 1.8 paired-end demultiplexed fastq format
 # There are forward (R1) and reverse (R2) reads for each sample
