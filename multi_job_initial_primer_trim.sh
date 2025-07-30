@@ -1,9 +1,9 @@
 #!/bin/bash
-# convert initial_primer_trim.sh file to unix format
-dos2unix initial_primer_trim.sh
-
 # set working directory
 cd [Working Directory]
+
+# convert initial_primer_trim.sh file to unix format
+dos2unix ./initial_primer_trim.sh
 
 #    Shell script to run        F-barcode  R-barcode    F-file name             R-file name
 source ./initial_primer_trim.sh  CCTGAATCGC  GCCTTCGTAG  F1_SWMP1_S1_L001_R1_001  F1_SWMP1_S1_L001_R2_001
