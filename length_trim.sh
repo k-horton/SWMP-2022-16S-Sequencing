@@ -18,6 +18,6 @@ cutadapt\
  -G CAAGCAGAAGACGGCATACGAGAT${RBARCODE}GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCTNNNNNNGACTACNVGGGTMTCTAATCC\
  -m 1\
  -l $RLENGTHCUT\
- -o $PWD/quality_trim/$FASTQR1.noprimer.ltrim.fastq\
- -p $PWD/quality_trim/$FASTQR2.noprimer.ltrim.fastq\
+ -o $PWD/length_trim/$FASTQR1.noprimer.ltrim.fastq\
+ -p $PWD/length_trim/$FASTQR2.noprimer.ltrim.fastq\
  $PWD/extracted_sequences/$FASTQR1.fastq	$PWD/extracted_sequences/$FASTQR2.fastq #input R1 and R2 files
