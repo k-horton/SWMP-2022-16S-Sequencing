@@ -11,8 +11,8 @@ conda activate pandaseq
 
 # Merge/concatenate R1 and R2 primer-removed untrimmed sequences
 pandaseq\
-  -f $PWD/quality_trim/${FASTQ}_L001_R1_001.noprimer.qtrim.fastq\
-  -r $PWD/quality_trim/${FASTQ}_L001_R2_001.noprimer.qtrim.fastq\
+  -f $PWD/quality_trim/${FASTQ}_L001_R1_001.noprimer.ltrim.fastq\
+  -r $PWD/quality_trim/${FASTQ}_L001_R2_001.noprimer.ltrim.fastq\
   -o 20\
   -g $PWD/merge_concat/${FASTQ}.merged.concat.log.txt\
   -F\
